@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navbar Component</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ffffff;
+    --ink: #14171f;
+    --muted: #5b6472;
+    --accent: #5b4fe8;
+    --accent-dark: #453bc4;
+    --accent-ink: #ffffff;
+    --border: #eceef2;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: #fbfbfc;
+  }
+
+  .nav{
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 14px 32px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav__logo{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--ink);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .nav__logo span{ color: var(--accent); }
+
+  .nav__links{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: nowrap;
+  }
+
+  .nav__links a{
+    position: relative;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.92rem;
+    padding: 6px 2px;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+  }
+
+  .nav__links a::after{
+    content:"";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+  }
+
+  .nav__links a:hover,
+  .nav__links a:focus-visible{
+    color: var(--ink);
+  }
+  .nav__links a:hover::after,
+  .nav__links a:focus-visible::after{
+    transform: scaleX(1);
+  }
+
+  .nav__actions{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .btn{
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .btn--ghost{
+    color: var(--ink);
+    background: transparent;
+    border-color: var(--border);
+  }
+  .btn--ghost:hover{ border-color: var(--muted); }
+
+  .btn--solid{
+    color: var(--accent-ink);
+    background: var(--accent);
+  }
+  .btn--solid:hover{ background: var(--accent-dark); }
+  .btn:active{ transform: translateY(1px); }
+
+  .btn:focus-visible,
+  .nav__logo:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .nav__toggle{
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+  }
+  .nav__toggle span{
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--ink);
+    margin: 4px 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  @media (max-width: 980px){
+    .nav__links{
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 32px 18px;
+      display: none;
+    }
+    .nav__links.is-open{ display: flex; }
+    .nav__links a{ width: 100%; padding: 10px 0; }
+    .nav__links a::after{ display: none; }
+
+    .nav__actions{ display: none; }
+    .nav__actions.is-open{
+      display: flex;
+      position: absolute;
+      top: calc(100% + 190px);
+      left: 32px;
+    }
+
+    .nav__toggle{ display: block; }
+  }
+
+  .demo{
+    max-width: 720px;
+    margin: 64px auto;
+    padding: 0 24px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .demo h1{ color: var(--ink); font-size: 1.6rem; margin-bottom: 8px;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <a href="#" class="nav__logo">
+    <span>&lt;/&gt;</span>YourLogo
+  </a>
+
+  <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  <ul class="nav__links" id="navLinks">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">Courses</a></li>
+    <li><a href="#">Trainers</a></li>
+    <li><a href="#">Tests</a></li>
+    <li><a href="#">Challenges</a></li>
+    <li><a href="#">Library</a></li>
+    <li><a href="#">Community</a></li>
+    <li><a href="#">Career</a></li>
+    <li><a href="#">Certificates</a></li>
+  </ul>
+
+  <div class="nav__actions" id="navActions">
+    <a href="#" class="btn btn--ghost">Log In</a>
+    <a href="#" class="btn btn--solid">Sign Up</a>
+  </div>
+</header>
+
+<div class="demo">
+  <h1>This is just a preview</h1>
+  <p>Scroll or resize the window narrow to see the mobile menu. Copy the &lt;header class="nav"&gt;…&lt;/header&gt; block plus the CSS into your own page.</p>
+</div>
+
+<script>
+  const toggle = document.getElementById('navToggle');
+  const links = document.getElementById('navLinks');
+  const actions = document.getElementById('navActions');
+
+  toggle.addEventListener('click', () => {
+    const open = links.classList.toggle('is-open');
+    actions.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', open);
+  });
+</script>
+
+</body>
+</html>
