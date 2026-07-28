@@ -350,7 +350,7 @@
       <button class="resend-link" id="resend-btn" disabled onclick="resendCode()">Resend code</button>
 
       <div class="demo-note">
-        Demo mode: no real email is sent. Enter any 6 digits and click Verify to continue.
+        Codes are checked in the browser for simplicity. That's fine for a personal project — a production app would check codes on a server instead.
       </div>
     </div>
 
@@ -363,7 +363,21 @@
 
 </main>
 
+<!-- EmailJS library: lets this page send real emails with no backend server -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
 <script>
+  // ===== PASTE YOUR 3 EMAILJS VALUES HERE =====
+  const EMAILJS_PUBLIC_KEY  = "ygOY8DsfGe410aAWi";
+  const EMAILJS_SERVICE_ID  = "service_6rrg3e2";
+  const EMAILJS_TEMPLATE_ID = "template_l9fb53r";
+  // ==============================================
+
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+
+  let currentCode = null;      // the real code we just emailed
+  let codeExpiresAt = null;    // timestamp (ms) when it stops working
+  let currentEmail = '';
   let countdownInterval;
   let resendInterval;
 
@@ -389,8 +403,8 @@
       }
     }
 
-    const email = form.querySelector('.email-input').value;
-    document.getElementById('verify-email').textContent = email;
+    currentEmail = form.querySelector('.email-input').value;
+    document.getElementById('verify-email').textContent = currentEmail;
 
     showView('view-verify');
     startVerification();
@@ -398,9 +412,16 @@
   }
 
   function fakeGoogle(role){
-    document.getElementById('verify-email').textContent = 'your Google account';
+    const typed = prompt("Google sign-in isn't wired up yet — type an email to test with:");
+    if (!typed) return;
+    currentEmail = typed;
+    document.getElementById('verify-email').textContent = currentEmail;
     showView('view-verify');
     startVerification();
+  }
+
+  function generateCode(){
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   function startVerification(){
@@ -411,14 +432,24 @@
     boxes.forEach(b => b.value = '');
     boxes[0].focus();
 
+    currentCode = generateCode();
+    codeExpiresAt = Date.now() + 15 * 60 * 1000;
+
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: currentEmail,
+      passcode: currentCode
+    }).catch((err) => {
+      alert("Couldn't send the email — double check your EmailJS keys in the code.");
+      console.error(err);
+    });
+
     clearInterval(countdownInterval);
-    let secondsLeft = 15 * 60;
     const countdownEl = document.getElementById('countdown');
     const timerEl = document.getElementById('timer');
     timerEl.classList.remove('expired');
 
     countdownInterval = setInterval(() => {
-      secondsLeft--;
+      const secondsLeft = Math.max(0, Math.round((codeExpiresAt - Date.now()) / 1000));
       const m = Math.floor(secondsLeft / 60);
       const s = secondsLeft % 60;
       countdownEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
@@ -453,10 +484,20 @@
   function verifyCode(){
     const boxes = document.querySelectorAll('.otp-inputs input');
     const code = Array.from(boxes).map(b => b.value).join('');
+
     if (code.length !== 6){
       alert('Enter all 6 digits.');
       return;
     }
+    if (Date.now() > codeExpiresAt){
+      alert('This code expired. Click "Resend code" to get a new one.');
+      return;
+    }
+    if (code !== currentCode){
+      alert('That code is incorrect. Please check your email and try again.');
+      return;
+    }
+
     clearInterval(countdownInterval);
     clearInterval(resendInterval);
     document.getElementById('verify-card').style.display = 'none';
