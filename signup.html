@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Your Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ffffff;
+    --bg-soft: #f6f7f9;
+    --ink: #14171f;
+    --muted: #5b6472;
+    --accent: #5b4fe8;
+    --accent-dark: #453bc4;
+    --accent-ink: #ffffff;
+    --border: #e4e6ec;
+    --danger: #d94848;
+    --success: #1c9d5c;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg-soft);
+  }
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 16px 32px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar__logo{
+    font-family: 'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:1.1rem;
+    text-decoration:none;
+    color: var(--ink);
+  }
+  .topbar__logo span{ color: var(--accent); }
+  .topbar__login{
+    font-size:0.9rem;
+    color: var(--muted);
+    text-decoration:none;
+  }
+  .topbar__login a{ color: var(--accent); font-weight:600; text-decoration:none; }
+
+  main{
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  .view{ display:none; }
+  .view.active{ display:block; animation: fadeIn .25s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  h1{ font-size:1.7rem; margin:0 0 6px; }
+  .subtitle{ color: var(--muted); margin:0 0 32px; font-size:0.98rem; }
+
+  .role-cards{ display:flex; flex-direction:column; gap:16px; }
+  .role-card{
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px 24px;
+    background: var(--bg);
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .role-card:hover{ border-color: var(--accent); box-shadow: 0 4px 14px rgba(91,79,232,0.08); }
+  .role-card__head{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .role-card__emoji{ font-size:1.4rem; }
+  .role-card__title{ font-weight:700; font-size:1.05rem; }
+  .role-card p{ color: var(--muted); font-size:0.92rem; line-height:1.5; margin:0 0 16px; }
+
+  .btn{
+    font-family:inherit;
+    font-size:0.92rem;
+    font-weight:600;
+    padding:11px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition: background .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .btn--solid{ background: var(--accent); color: var(--accent-ink); }
+  .btn--solid:hover{ background: var(--accent-dark); }
+  .btn--full{ width:100%; }
+  .btn:active{ transform: translateY(1px); }
+  .btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .back-btn{
+    background:none; border:none; cursor:pointer;
+    color: var(--muted); font-size:0.9rem; font-weight:500;
+    padding:0 0 20px; display:flex; align-items:center; gap:6px;
+  }
+  .back-btn:hover{ color: var(--ink); }
+
+  .form-card{
+    background: var(--bg);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:28px;
+  }
+  .form-card h2{ margin:0 0 4px; font-size:1.25rem; }
+  .form-card .hint{ color: var(--muted); font-size:0.88rem; margin:0 0 22px; }
+
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
+  .field input, .field select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:0.95rem;
+    font-family:inherit;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,79,232,0.12);
+  }
+  .field .field-error{
+    color: var(--danger);
+    font-size:0.8rem;
+    margin-top:4px;
+    display:none;
+  }
+  .field.invalid input{ border-color: var(--danger); }
+  .field.invalid .field-error{ display:block; }
+  .field .field-note{ color: var(--muted); font-size:0.78rem; margin-top:4px; }
+
+  .row-2{ display:flex; gap:12px; }
+  .row-2 .field{ flex:1; }
+
+  .divider{
+    display:flex; align-items:center; gap:12px;
+    color: var(--muted); font-size:0.82rem;
+    margin:20px 0;
+  }
+  .divider::before, .divider::after{
+    content:""; flex:1; height:1px; background: var(--border);
+  }
+
+  .btn-google{
+    width:100%;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background: var(--bg);
+    border:1px solid var(--border);
+    padding:10px 16px;
+    border-radius:8px;
+    font-family:inherit; font-size:0.9rem; font-weight:600;
+    color: var(--ink);
+    cursor:pointer;
+  }
+  .btn-google:hover{ border-color: var(--muted); }
+
+  .verify-card{
+    background: var(--bg);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:36px 28px;
+    text-align:center;
+  }
+  .verify-card .icon{ font-size:2rem; margin-bottom:10px; }
+  .verify-card p{ color: var(--muted); font-size:0.92rem; margin: 0 0 26px; }
+  .verify-card strong{ color: var(--ink); }
+
+  .otp-inputs{ display:flex; gap:10px; justify-content:center; margin-bottom:18px; }
+  .otp-inputs input{
+    width:44px; height:52px;
+    text-align:center;
+    font-size:1.3rem;
+    font-weight:700;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .otp-inputs input:focus{
+    outline:none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,79,232,0.12);
+  }
+
+  .timer{ font-size:0.85rem; color: var(--muted); margin-bottom:22px; }
+  .timer strong{ color: var(--ink); font-family:'JetBrains Mono', monospace; }
+  .timer.expired strong{ color: var(--danger); }
+
+  .resend-link{
+    background:none; border:none; cursor:pointer;
+    color: var(--accent); font-weight:600; font-size:0.88rem;
+    margin-top:14px;
+  }
+  .resend-link:disabled{ color: var(--muted); cursor:not-allowed; }
+
+  .success-box{
+    display:none;
+    text-align:center;
+    padding:40px 20px;
+  }
+  .success-box.active{ display:block; }
+  .success-box .icon{ font-size:2.4rem; margin-bottom:12px; }
+
+  .demo-note{
+    margin-top:28px;
+    padding:12px 16px;
+    background: #fff8e6;
+    border:1px solid #f0dca0;
+    border-radius:10px;
+    font-size:0.8rem;
+    color:#7a5c00;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="#" class="topbar__logo"><span>&lt;/&gt;</span> YourLogo</a>
+  <div class="topbar__login">Already have an account? <a href="#">Log in</a></div>
+</div>
+
+<main>
+
+  <!-- ROLE SELECTION -->
+  <section class="view active" id="view-role">
+    <h1>Create Your Account</h1>
+    <p class="subtitle">Choose the account that best describes you.</p>
+
+    <div class="role-cards">
+      <div class="role-card">
+        <div class="role-card__head"><span class="role-card__emoji">👨‍🎓</span><span class="role-card__title">Student</span></div>
+        <p>Learn at your own pace with interactive lessons, quizzes, achievements, and personalized progress.</p>
+        <button class="btn btn--solid btn--full" onclick="showView('view-student')">Continue as Student</button>
+      </div>
+
+      <div class="role-card">
+        <div class="role-card__head"><span class="role-card__emoji">👨‍👩‍👧</span><span class="role-card__title">Parent</span></div>
+        <p>Monitor your child's progress, assign learning goals, receive reports, and manage multiple children from one dashboard.</p>
+        <button class="btn btn--solid btn--full" onclick="showView('view-parent')">Continue as Parent</button>
+      </div>
+
+      <div class="role-card">
+        <div class="role-card__head"><span class="role-card__emoji">👩‍🏫</span><span class="role-card__title">Teacher</span></div>
+        <p>Create classrooms, assign lessons, track student performance, and manage assignments.</p>
+        <button class="btn btn--solid btn--full" onclick="showView('view-teacher')">Continue as Teacher</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDENT FORM -->
+  <section class="view" id="view-student">
+    <button class="back-btn" onclick="showView('view-role')">&larr; Back</button>
+    <div class="form-card">
+      <h2>👨‍🎓 Student Sign Up</h2>
+      <p class="hint">Create your student account.</p>
+      <form onsubmit="return submitForm(event, 'student')">
+        <div class="row-2">
+          <div class="field"><label>First Name</label><input required></div>
+          <div class="field"><label>Last Name</label><input required></div>
+        </div>
+        <div class="field"><label>Username</label><input required></div>
+        <div class="field"><label>Email</label><input type="email" required class="email-input"></div>
+        <div class="field"><label>Password</label><input type="password" required minlength="8" class="pw-input"></div>
+        <div class="field confirm-field">
+          <label>Confirm Password</label>
+          <input type="password" required class="confirm-input">
+          <div class="field-error">Passwords don't match</div>
+        </div>
+        <div class="field"><label>Date of Birth</label><input type="date" required></div>
+        <button type="submit" class="btn btn--solid btn--full">Create Account</button>
+      </form>
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="fakeGoogle('student')">🔵 Sign up with Google</button>
+    </div>
+  </section>
+
+  <!-- PARENT FORM -->
+  <section class="view" id="view-parent">
+    <button class="back-btn" onclick="showView('view-role')">&larr; Back</button>
+    <div class="form-card">
+      <h2>👨‍👩‍👧 Parent Sign Up</h2>
+      <p class="hint">Create your parent account. You'll be able to add children after signing up.</p>
+      <form onsubmit="return submitForm(event, 'parent')">
+        <div class="row-2">
+          <div class="field"><label>First Name</label><input required></div>
+          <div class="field"><label>Last Name</label><input required></div>
+        </div>
+        <div class="field"><label>Email</label><input type="email" required class="email-input"></div>
+        <div class="field"><label>Password</label><input type="password" required minlength="8"></div>
+        <button type="submit" class="btn btn--solid btn--full">Create Account</button>
+      </form>
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="fakeGoogle('parent')">🔵 Sign up with Google</button>
+    </div>
+  </section>
+
+  <!-- TEACHER FORM -->
+  <section class="view" id="view-teacher">
+    <button class="back-btn" onclick="showView('view-role')">&larr; Back</button>
+    <div class="form-card">
+      <h2>👩‍🏫 Teacher Sign Up</h2>
+      <p class="hint">Create your teacher account.</p>
+      <form onsubmit="return submitForm(event, 'teacher')">
+        <div class="row-2">
+          <div class="field"><label>First Name</label><input required></div>
+          <div class="field"><label>Last Name</label><input required></div>
+        </div>
+        <div class="field">
+          <label>School / Organization</label>
+          <input required>
+          <div class="field-note">Must be registered in our school database.</div>
+        </div>
+        <div class="field"><label>Email</label><input type="email" required class="email-input"></div>
+        <div class="field"><label>Password</label><input type="password" required minlength="8"></div>
+        <button type="submit" class="btn btn--solid btn--full">Create Account</button>
+      </form>
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="fakeGoogle('teacher')">🔵 Sign up with Google</button>
+    </div>
+  </section>
+
+  <!-- VERIFICATION -->
+  <section class="view" id="view-verify">
+    <div class="verify-card" id="verify-card">
+      <div class="icon">📩</div>
+      <h2>Verify your email</h2>
+      <p>We sent a 6-digit code to <strong id="verify-email">your email</strong></p>
+
+      <div class="otp-inputs">
+        <input maxlength="1" inputmode="numeric">
+        <input maxlength="1" inputmode="numeric">
+        <input maxlength="1" inputmode="numeric">
+        <input maxlength="1" inputmode="numeric">
+        <input maxlength="1" inputmode="numeric">
+        <input maxlength="1" inputmode="numeric">
+      </div>
+
+      <div class="timer" id="timer">Code expires in <strong id="countdown">15:00</strong></div>
+
+      <button class="btn btn--solid btn--full" onclick="verifyCode()">Verify</button>
+      <br>
+      <button class="resend-link" id="resend-btn" disabled onclick="resendCode()">Resend code</button>
+
+      <div class="demo-note">
+        Demo mode: no real email is sent. Enter any 6 digits and click Verify to continue.
+      </div>
+    </div>
+
+    <div class="success-box" id="success-box">
+      <div class="icon">✅</div>
+      <h2>Account created!</h2>
+      <p>This is where you'd land on your new dashboard.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  let countdownInterval;
+  let resendInterval;
+
+  function showView(id){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function submitForm(e, role){
+    e.preventDefault();
+    const form = e.target;
+
+    const pw = form.querySelector('.pw-input');
+    const confirm = form.querySelector('.confirm-input');
+    if (pw && confirm){
+      const confirmField = form.querySelector('.confirm-field');
+      if (pw.value !== confirm.value){
+        confirmField.classList.add('invalid');
+        return false;
+      } else {
+        confirmField.classList.remove('invalid');
+      }
+    }
+
+    const email = form.querySelector('.email-input').value;
+    document.getElementById('verify-email').textContent = email;
+
+    showView('view-verify');
+    startVerification();
+    return false;
+  }
+
+  function fakeGoogle(role){
+    document.getElementById('verify-email').textContent = 'your Google account';
+    showView('view-verify');
+    startVerification();
+  }
+
+  function startVerification(){
+    document.getElementById('verify-card').style.display = 'block';
+    document.getElementById('success-box').classList.remove('active');
+
+    const boxes = document.querySelectorAll('.otp-inputs input');
+    boxes.forEach(b => b.value = '');
+    boxes[0].focus();
+
+    clearInterval(countdownInterval);
+    let secondsLeft = 15 * 60;
+    const countdownEl = document.getElementById('countdown');
+    const timerEl = document.getElementById('timer');
+    timerEl.classList.remove('expired');
+
+    countdownInterval = setInterval(() => {
+      secondsLeft--;
+      const m = Math.floor(secondsLeft / 60);
+      const s = secondsLeft % 60;
+      countdownEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      if (secondsLeft <= 0){
+        clearInterval(countdownInterval);
+        timerEl.innerHTML = 'Code expired.';
+        timerEl.classList.add('expired');
+      }
+    }, 1000);
+
+    clearInterval(resendInterval);
+    const resendBtn = document.getElementById('resend-btn');
+    let cooldown = 30;
+    resendBtn.disabled = true;
+    resendBtn.textContent = `Resend code (${cooldown}s)`;
+    resendInterval = setInterval(() => {
+      cooldown--;
+      if (cooldown <= 0){
+        clearInterval(resendInterval);
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend code';
+      } else {
+        resendBtn.textContent = `Resend code (${cooldown}s)`;
+      }
+    }, 1000);
+  }
+
+  function resendCode(){
+    startVerification();
+  }
+
+  function verifyCode(){
+    const boxes = document.querySelectorAll('.otp-inputs input');
+    const code = Array.from(boxes).map(b => b.value).join('');
+    if (code.length !== 6){
+      alert('Enter all 6 digits.');
+      return;
+    }
+    clearInterval(countdownInterval);
+    clearInterval(resendInterval);
+    document.getElementById('verify-card').style.display = 'none';
+    document.getElementById('success-box').classList.add('active');
+  }
+
+  document.querySelectorAll('.otp-inputs input').forEach((input, idx, all) => {
+    input.addEventListener('input', () => {
+      if (input.value && idx < all.length - 1){
+        all[idx + 1].focus();
+      }
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && idx > 0){
+        all[idx - 1].focus();
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
