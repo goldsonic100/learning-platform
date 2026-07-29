@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service | Pebblio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ffffff;
+    --bg-soft: #f6f7f9;
+    --ink: #14171f;
+    --muted: #5b6472;
+    --accent: #5b4fe8;
+    --accent-dark: #453bc4;
+    --accent-ink: #ffffff;
+    --border: #eceef2;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: #fbfbfc;
+  }
+
+  /* ---------- NAVBAR (same as homepage) ---------- */
+  .nav{
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px; padding: 14px 32px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav__logo{
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700; font-size: 1.15rem;
+    color: var(--ink); text-decoration: none; flex-shrink: 0;
+  }
+  .nav__logo span{ color: var(--accent); }
+  .nav__logo-img{ height: 34px; width: auto; display: block; }
+  .nav__links{
+    display: flex; align-items: center; gap: 28px;
+    list-style: none; margin: 0; padding: 0; flex-wrap: nowrap;
+  }
+  .nav__links a{
+    position: relative; color: var(--muted); text-decoration: none;
+    font-weight: 500; font-size: 0.92rem; padding: 6px 2px; white-space: nowrap;
+    transition: color 0.15s ease;
+  }
+  .nav__links a:hover{ color: var(--ink); }
+  .nav__actions{ display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .btn{
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    padding: 9px 18px; border-radius: 8px; cursor: pointer;
+    text-decoration: none; border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .btn--ghost{ color: var(--ink); background: transparent; border-color: var(--border); }
+  .btn--ghost:hover{ border-color: var(--muted); }
+  .btn--solid{ color: var(--accent-ink); background: var(--accent); }
+  .btn--solid:hover{ background: var(--accent-dark); }
+
+  .nav__toggle{ display:none; background:none; border:none; cursor:pointer; padding:6px; }
+  .nav__toggle span{ display:block; width:22px; height:2px; background:var(--ink); margin:4px 0; }
+
+  @media (max-width: 980px){
+    .nav__links, .nav__actions{ display:none; }
+    .nav__toggle{ display:block; }
+  }
+
+  /* ---------- CONTENT ---------- */
+  main{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 64px 24px 100px;
+  }
+
+  .doc-header{ margin-bottom: 48px; }
+  .doc-header h1{ font-size: 2.1rem; margin: 0 0 8px; }
+  .doc-header .updated{ color: var(--muted); font-size: 0.9rem; }
+
+  section.term{ margin-bottom: 36px; }
+  section.term h2{
+    font-size: 1.15rem;
+    margin: 0 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.term p{
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 0.96rem;
+    margin: 0 0 12px;
+  }
+  section.term ul{
+    margin: 0 0 12px;
+    padding-left: 22px;
+    line-height: 1.8;
+    font-size: 0.96rem;
+  }
+  section.term li{ margin-bottom: 4px; }
+
+  .legal-caps{
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-size: 0.86rem;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  /* ---------- FOOTER (same as homepage) ---------- */
+  .footer{ padding: 40px 24px; text-align: center; border-top: 1px solid var(--border); }
+  .footer__links{ display:flex; justify-content:center; gap:26px; flex-wrap:wrap; margin-bottom:18px; }
+  .footer__links a{ color: var(--muted); text-decoration:none; font-size:0.88rem; }
+  .footer__links a:hover{ color: var(--ink); }
+  .footer__copy{ color: var(--muted); font-size:0.82rem; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <a href="index.html" class="nav__logo"><img src="pebblio-logo.png" alt="Pebblio" class="nav__logo-img"></a>
+  <button class="nav__toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+  <ul class="nav__links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="#">Courses</a></li>
+    <li><a href="#">Trainers</a></li>
+    <li><a href="#">Tests</a></li>
+    <li><a href="#">Challenges</a></li>
+    <li><a href="#">Library</a></li>
+    <li><a href="#">Community</a></li>
+    <li><a href="#">Career</a></li>
+    <li><a href="#">Certificates</a></li>
+  </ul>
+  <div class="nav__actions" data-auth-actions>
+    <a href="login.html" class="btn btn--ghost">Log In</a>
+    <a href="signup.html" class="btn btn--solid">Sign Up</a>
+  </div>
+</header>
+
+<main>
+  <div class="doc-header">
+    <h1>Terms of Service</h1>
+    <div class="updated">Last Updated: July 29, 2026</div>
+  </div>
+
+  <section class="term">
+    <h2>1. Acceptance of Terms</h2>
+    <p>By accessing and using the Pebblio website ("the Website" or "the Service"), you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to these terms, please do not use our website.</p>
+  </section>
+
+  <section class="term">
+    <h2>2. Website Use License</h2>
+    <p>Permission is granted to temporarily access and use our website for personal, non-commercial viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:</p>
+    <ul>
+      <li>Modify, copy, or reproduce any content, code, or materials from the website</li>
+      <li>Use the website or its content for any commercial purpose or for any public display</li>
+      <li>Attempt to reverse engineer, decompile, or disassemble any software or code contained on the website</li>
+      <li>Remove any copyright, trademark, or other proprietary notations from the website content</li>
+      <li>Transfer the materials to another person or "mirror" the website on any other server</li>
+      <li>Use automated systems (bots, scrapers, etc.) to access or collect data from the website</li>
+      <li>Frame or embed the website in another website without our express written permission</li>
+    </ul>
+  </section>
+
+  <section class="term">
+    <h2>3. Our Rights</h2>
+    <p>Pebblio reserves the right to:</p>
+    <ul>
+      <li>Modify, suspend, or discontinue any aspect of the website or Service at any time without notice</li>
+      <li>Change, update, or remove features, content, pages, or functionality from the website as we see fit</li>
+      <li>Restrict or terminate access to the website for any user at our sole discretion</li>
+      <li>Use, modify, or distribute any content, data, or information provided through the website in any manner we deem appropriate</li>
+      <li>Make any changes to our website, products, services, or policies without prior notice</li>
+      <li>Block or restrict access from specific IP addresses or geographic regions</li>
+      <li>Implement or modify website features, security measures, or technical requirements</li>
+    </ul>
+  </section>
+
+  <section class="term">
+    <h2>4. Disclaimer of Liability</h2>
+    <p>To the fullest extent permitted by law, Pebblio shall not be liable for:</p>
+    <ul>
+      <li>Any direct, indirect, incidental, special, consequential, or punitive damages</li>
+      <li>Loss of profits, revenue, data, or other intangible losses</li>
+      <li>Any errors, mistakes, or inaccuracies in website content</li>
+      <li>Any interruption or cessation of transmission to or from the website</li>
+      <li>Website downtime, maintenance, or technical issues</li>
+      <li>Any bugs, viruses, trojan horses, malware, or the like that may be transmitted through the website</li>
+      <li>Any loss or damage of any kind incurred as a result of your use of the website</li>
+      <li>Links to external websites or third-party content</li>
+      <li>Any actions taken based on information provided on the website</li>
+    </ul>
+    <div class="legal-caps">
+      The website and service are provided "as is" and "as available" without warranties of any kind, either express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, or non-infringement. We do not warrant that the website will be uninterrupted, secure, or error-free.
+    </div>
+  </section>
+
+  <section class="term">
+    <h2>5. Data Usage</h2>
+    <p>By using the Service, you acknowledge and agree that:</p>
+    <ul>
+      <li>We will not sell your personal data to third parties</li>
+      <li>Your data may be used by us and our partners for promotional services, alerts, notifications, and other business purposes</li>
+      <li>We may collect, store, and analyze usage data to improve our services</li>
+      <li>We reserve the right to use aggregated, anonymized data for any purpose</li>
+    </ul>
+  </section>
+
+  <section class="term">
+    <h2>6. User Conduct</h2>
+    <p>When using our website, you agree not to:</p>
+    <ul>
+      <li>Use the website for any unlawful purpose or in violation of any laws</li>
+      <li>Interfere with or disrupt the website, servers, or networks connected to the website</li>
+      <li>Attempt to gain unauthorized access to any portion of the website, user accounts, or computer systems</li>
+      <li>Impersonate any person or entity or falsely state or misrepresent your affiliation with any person or entity</li>
+      <li>Upload, post, or transmit any malicious code, viruses, or harmful content</li>
+      <li>Use automated systems to access the website in a manner that sends more requests to our servers than a human can reasonably produce</li>
+      <li>Scrape, crawl, or harvest data from the website without our express written permission</li>
+      <li>Engage in any activity that could damage, disable, or impair the website's functionality</li>
+    </ul>
+  </section>
+
+  <section class="term">
+    <h2>7. Account Termination</h2>
+    <p>We reserve the right to terminate or suspend your account and access to the website immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach these Terms, engage in prohibited conduct, or for any other reason we deem necessary.</p>
+  </section>
+
+  <section class="term">
+    <h2>8. Intellectual Property</h2>
+    <p>All content on this website, including but not limited to text, graphics, logos, images, software, and code, is the property of Pebblio or its content suppliers and is protected by copyright, trademark, and other intellectual property laws. You may not use, reproduce, or distribute any content from this website without our express written permission.</p>
+  </section>
+
+  <section class="term">
+    <h2>9. Changes to Terms</h2>
+    <p>We reserve the right to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days notice prior to any new terms taking effect.</p>
+  </section>
+
+  <section class="term">
+    <h2>10. Governing Law</h2>
+    <p>These Terms shall be governed and construed in accordance with the laws of the Commonwealth of Massachusetts, United States, without regard to its conflict of law provisions. Any disputes arising out of or relating to these Terms or the Service shall be subject to the exclusive jurisdiction of the courts of the Commonwealth of Massachusetts.</p>
+  </section>
+
+  <section class="term">
+    <h2>11. Contact Information</h2>
+    <p>If you have any questions about these Terms of Service, please contact us through our Support page.</p>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer__links">
+    <a href="index.html#about">About</a>
+    <a href="#">Careers</a>
+    <a href="#">Help Center</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms of Service</a>
+    <a href="#">Contact Us</a>
+  </div>
+  <div class="footer__copy">© Pebblio</div>
+</footer>
+
+<script src="auth.js"></script>
+</body>
+</html>
