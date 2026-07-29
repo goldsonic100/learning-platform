@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Navbar Component</title>
+<title>Pebblio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -26,6 +26,7 @@
     background: #fbfbfc;
   }
 
+  /* ---------- NAVBAR ---------- */
   .nav{
     position: sticky;
     top: 0;
@@ -134,6 +135,7 @@
     outline-offset: 2px;
   }
 
+  /* Mobile toggle */
   .nav__toggle{
     display: none;
     background: none;
@@ -179,14 +181,212 @@
     .nav__toggle{ display: block; }
   }
 
-  .demo{
-    max-width: 720px;
-    margin: 64px auto;
+  /* ---------- HERO ---------- */
+  .hero{
+    position: relative;
+    overflow: hidden;
+    padding: 96px 24px 88px;
+    text-align: center;
+  }
+  .hero::before{
+    content:"";
+    position: absolute;
+    top: -180px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 720px;
+    height: 420px;
+    background: radial-gradient(closest-side, rgba(91,79,232,0.14), transparent);
+    pointer-events: none;
+  }
+  .hero__inner{
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .hero h1{
+    font-size: 3rem;
+    line-height: 1.15;
+    font-weight: 700;
+    margin: 0 0 20px;
+    letter-spacing: -0.01em;
+  }
+  .hero h1 .accent-text{ color: var(--accent); }
+  .hero__subtitle{
+    color: var(--muted);
+    font-size: 1.08rem;
+    line-height: 1.65;
+    max-width: 560px;
+    margin: 0 auto 36px;
+  }
+  .hero__actions{
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .btn--lg{ padding: 14px 28px; font-size: 1rem; border-radius: 10px; }
+
+  /* ---------- SEARCH ---------- */
+  .search-section{
+    max-width: 640px;
+    margin: 0 auto 100px;
     padding: 0 24px;
     text-align: center;
-    color: var(--muted);
   }
-  .demo h1{ color: var(--ink); font-size: 1.6rem; margin-bottom: 8px;}
+  .search-box{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 8px 8px 8px 20px;
+    box-shadow: 0 10px 30px rgba(20,23,31,0.06);
+  }
+  .search-box .search-icon{ font-size: 1.05rem; opacity: 0.6; }
+  .search-box input{
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.98rem;
+    padding: 10px 0;
+    color: var(--ink);
+    background: transparent;
+  }
+  .search-examples{
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .chip{
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .chip:hover{ border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- SECTION HEADINGS ---------- */
+  .section-heading{
+    text-align: center;
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin: 0 0 40px;
+  }
+
+  /* ---------- GOALS ---------- */
+  .goals{ max-width: 1080px; margin: 0 auto 110px; padding: 0 24px; }
+  .goals__grid{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+  .goal-card{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 14px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  }
+  .goal-card:hover{
+    border-color: var(--accent);
+    box-shadow: 0 10px 24px rgba(91,79,232,0.1);
+    transform: translateY(-3px);
+  }
+  .goal-card__emoji{ font-size: 1.8rem; }
+
+  /* ---------- WHY ---------- */
+  .why{ background: var(--bg-soft, #f6f7f9); padding: 90px 24px; }
+  .why__inner{ max-width: 900px; margin: 0 auto; }
+  .why__grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 32px;
+  }
+  .why__item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .why__check{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+  }
+
+  /* ---------- CTA ---------- */
+  .cta{
+    background: var(--accent);
+    color: #fff;
+    text-align: center;
+    padding: 90px 24px;
+  }
+  .cta h2{ font-size: 2rem; margin: 0 0 12px; }
+  .cta p{ font-size: 1.02rem; opacity: 0.9; margin: 0 0 32px; }
+  .cta .btn--solid{ background: #fff; color: var(--accent); }
+  .cta .btn--solid:hover{ background: #f1f0fe; }
+
+  /* ---------- FOOTER ---------- */
+  .footer{
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .footer__links{
+    display: flex;
+    justify-content: center;
+    gap: 26px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .footer__links a{
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.88rem;
+  }
+  .footer__links a:hover{ color: var(--ink); }
+  .footer__copy{ color: var(--muted); font-size: 0.82rem; }
+
+  @media (max-width: 860px){
+    .hero h1{ font-size: 2.2rem; }
+    .goals__grid{ grid-template-columns: repeat(2, 1fr); }
+    .why__grid{ grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -218,10 +418,80 @@
   </div>
 </header>
 
-<div class="demo">
-  <h1>This is just a preview</h1>
-  <p>Scroll or resize the window narrow to see the mobile menu. Copy the &lt;header class="nav"&gt;…&lt;/header&gt; block plus the CSS into your own page.</p>
-</div>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero__inner">
+    <h1>Learn Anything. <span class="accent-text">Become Anything.</span></h1>
+    <p class="hero__subtitle">One platform for every age, every subject, and every goal. Master reading, math, science, coding, languages, business, test prep, life skills, and thousands of other interactive lessons.</p>
+    <div class="hero__actions">
+      <a href="signup.html" class="btn btn--solid btn--lg">Start Learning</a>
+      <a href="courses.html" class="btn btn--ghost btn--lg">Browse Subjects</a>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<section class="search-section">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Search for anything...">
+    <button class="btn btn--solid">Search</button>
+  </div>
+  <div class="search-examples">
+    <span>Examples:</span>
+    <button class="chip">Reading</button>
+    <button class="chip">Algebra</button>
+    <button class="chip">SAT</button>
+  </div>
+</section>
+
+<!-- CHOOSE YOUR GOAL -->
+<section class="goals">
+  <h2 class="section-heading">Choose Your Goal</h2>
+  <div class="goals__grid">
+    <a href="#" class="goal-card"><span class="goal-card__emoji">🎒</span><span>Improve School Grades</span></a>
+    <a href="#" class="goal-card"><span class="goal-card__emoji">🎓</span><span>Prepare for an Exam</span></a>
+    <a href="#" class="goal-card"><span class="goal-card__emoji">💻</span><span>Learn a New Skill</span></a>
+    <a href="#" class="goal-card"><span class="goal-card__emoji">💼</span><span>Advance Your Career</span></a>
+    <a href="#" class="goal-card"><span class="goal-card__emoji">🧠</span><span>Learn Something New</span></a>
+  </div>
+</section>
+
+<!-- WHY PEBBLIO -->
+<section class="why">
+  <div class="why__inner">
+    <h2 class="section-heading">Why Pebblio?</h2>
+    <div class="why__grid">
+      <div class="why__item"><span class="why__check">✓</span>Interactive Lessons</div>
+      <div class="why__item"><span class="why__check">✓</span>Personalized Practice</div>
+      <div class="why__item"><span class="why__check">✓</span>Progress Tracking</div>
+      <div class="why__item"><span class="why__check">✓</span>XP, Streaks & Achievements</div>
+      <div class="why__item"><span class="why__check">✓</span>Certificates</div>
+      <div class="why__item"><span class="why__check">✓</span>Learn Anytime, Anywhere</div>
+      <div class="why__item"><span class="why__check">✓</span>Built-in AI Learning Assistant</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Ready to Start?</h2>
+  <p>Join Pebblio and begin your learning journey today.</p>
+  <a href="signup.html" class="btn btn--solid btn--lg">Create Free Account</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer__links">
+    <a href="#">About</a>
+    <a href="#">Careers</a>
+    <a href="#">Help Center</a>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Contact Us</a>
+  </div>
+  <div class="footer__copy">© Pebblio</div>
+</footer>
 
 <script>
   const toggle = document.getElementById('navToggle');
