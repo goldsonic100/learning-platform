@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard | Pebblio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ffffff;
+    --bg-soft: #f6f7f9;
+    --ink: #14171f;
+    --muted: #5b6472;
+    --accent: #5b4fe8;
+    --accent-dark: #453bc4;
+    --accent-ink: #ffffff;
+    --border: #e4e6ec;
+    --danger: #d94848;
+    --success: #1c9d5c;
+    --gold: #e8a72c;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg-soft);
+  }
+
+  /* ---------- TOPBAR ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 14px 32px; background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  .topbar__logo-img{ height: 30px; width: auto; display: block; }
+  .topbar__right{ display:flex; align-items:center; gap:14px; }
+  .btn{
+    font-family:inherit; font-size:0.88rem; font-weight:600;
+    padding:9px 16px; border-radius:8px; cursor:pointer;
+    border:1px solid transparent; text-decoration:none; display:inline-flex; align-items:center;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .btn--ghost{ color: var(--ink); background: transparent; border-color: var(--border); }
+  .btn--ghost:hover{ border-color: var(--muted); }
+  .btn--solid{ color:#fff; background: var(--accent); }
+  .btn--solid:hover{ background: var(--accent-dark); }
+
+  main{ max-width: 920px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  /* ---------- TABS ---------- */
+  .tabs{ display:flex; gap:6px; margin-bottom:28px; border-bottom: 1px solid var(--border); }
+  .tab-btn{
+    font-family:inherit; font-size:0.92rem; font-weight:600;
+    background:none; border:none; cursor:pointer;
+    padding: 12px 6px; margin-right: 22px;
+    color: var(--muted); border-bottom: 2px solid transparent;
+  }
+  .tab-btn.active{ color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  /* ---------- WELCOME HEADER ---------- */
+  .welcome{
+    display:flex; align-items:center; gap:16px;
+    background: var(--bg); border:1px solid var(--border); border-radius:16px;
+    padding: 22px 24px; margin-bottom: 24px;
+  }
+  .avatar{
+    width:56px; height:56px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:1.2rem; color:#fff;
+    flex-shrink:0; overflow:hidden;
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
+  .welcome__name{ font-size:1.2rem; font-weight:700; margin:0 0 4px; }
+  .badge-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .badge{
+    font-size:0.74rem; font-weight:700; padding:3px 10px; border-radius:999px;
+    text-transform:uppercase; letter-spacing:0.02em;
+  }
+  .badge--role{ background:#ece9fd; color: var(--accent-dark); }
+  .badge--verified{ background:#e3f6ea; color: var(--success); }
+  .badge--unverified{ background:#fdeee3; color:#a15c1e; }
+
+  /* ---------- STATS GRID ---------- */
+  .stats-grid{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; margin-bottom:24px;
+  }
+  .stat-card{
+    background: var(--bg); border:1px solid var(--border); border-radius:14px;
+    padding:20px;
+  }
+  .stat-card__label{ font-size:0.78rem; color: var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.03em; margin-bottom:8px; }
+  .stat-card__value{ font-size:1.6rem; font-weight:700; }
+  .stat-card__sub{ font-size:0.8rem; color: var(--muted); margin-top:4px; }
+
+  .level-bar-track{
+    height:8px; background: var(--border); border-radius:999px; margin-top:10px; overflow:hidden;
+  }
+  .level-bar-fill{
+    height:100%; background: var(--accent); border-radius:999px;
+    transition: width .3s ease;
+  }
+
+  /* ---------- DEMO PANEL ---------- */
+  .demo-panel{
+    background: #fff8e6; border:1px solid #f0dca0; border-radius:14px;
+    padding:20px 22px; margin-bottom:24px;
+  }
+  .demo-panel h3{ margin:0 0 6px; font-size:1rem; }
+  .demo-panel p{ margin:0 0 14px; font-size:0.88rem; color:#7a5c00; }
+
+  .role-note{
+    background: var(--bg); border:1px solid var(--border); border-radius:14px;
+    padding:28px; text-align:center; color: var(--muted);
+  }
+
+  /* ---------- ACCOUNT SETTINGS ---------- */
+  .settings-section{
+    background: var(--bg); border:1px solid var(--border); border-radius:14px;
+    padding:26px; margin-bottom:20px;
+  }
+  .settings-section h3{ margin:0 0 18px; font-size:1.02rem; }
+
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
+  .field input{
+    width:100%; padding:10px 12px; border:1px solid var(--border);
+    border-radius:8px; font-size:0.95rem; font-family:inherit;
+  }
+  .field input:focus{
+    outline:none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,79,232,0.12);
+  }
+  .field input:disabled{ background: var(--bg-soft); color: var(--muted); }
+  .field .hint{ font-size:0.78rem; color: var(--muted); margin-top:4px; }
+  .field .err{ font-size:0.78rem; color: var(--danger); margin-top:4px; display:none; }
+  .field.invalid input{ border-color: var(--danger); }
+  .field.invalid .err{ display:block; }
+
+  .row-2{ display:flex; gap:12px; }
+  .row-2 .field{ flex:1; }
+
+  .readonly-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
+  .readonly-item .label{ font-size:0.78rem; color: var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.03em; margin-bottom:4px; }
+  .readonly-item .value{ font-size:0.92rem; word-break: break-all; }
+  .readonly-item .value.mono{ font-family:'JetBrains Mono', monospace; font-size:0.8rem; }
+
+  .save-msg{ font-size:0.85rem; color: var(--success); margin-left:12px; display:none; }
+  .save-msg.show{ display:inline; }
+
+  @media (max-width: 760px){
+    .stats-grid{ grid-template-columns: repeat(2, 1fr); }
+    .readonly-grid{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html"><img src="pebblio-logo.png" alt="Pebblio" class="topbar__logo-img"></a>
+  <div class="topbar__right">
+    <a href="index.html" class="btn btn--ghost">Home</a>
+    <button class="btn btn--solid" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<main>
+
+  <div class="welcome">
+    <div class="avatar" id="avatar">?</div>
+    <div>
+      <div class="welcome__name" id="welcome-name">Welcome back</div>
+      <div class="badge-row">
+        <span class="badge badge--role" id="badge-role">Student</span>
+        <span class="badge badge--verified" id="badge-verified">Verified</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('home')">Dashboard</button>
+    <button class="tab-btn" onclick="showTab('settings')">Account Settings</button>
+  </div>
+
+  <!-- HOME / GAMIFICATION TAB -->
+  <div class="tab-panel active" id="tab-home">
+
+    <div id="student-stats">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__label">Level</div>
+          <div class="stat-card__value" id="stat-level">1</div>
+          <div class="level-bar-track"><div class="level-bar-fill" id="level-bar" style="width:0%"></div></div>
+          <div class="stat-card__sub" id="stat-xp-sub">0 / 100 XP</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Coins</div>
+          <div class="stat-card__value">🪙 <span id="stat-coins">0</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Current Streak</div>
+          <div class="stat-card__value">🔥 <span id="stat-streak">0</span></div>
+          <div class="stat-card__sub">days in a row</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Total Learning Time</div>
+          <div class="stat-card__value" id="stat-time">0m</div>
+          <div class="stat-card__sub">from completed lessons</div>
+        </div>
+      </div>
+
+      <div class="demo-panel">
+        <h3>No real courses yet — try the demo</h3>
+        <p>Once real courses/trainers/tests exist, finishing one should call the same function this button does. For now, click it to see XP, coins, streak, and learning time update for real.</p>
+        <button class="btn btn--solid" onclick="doDemoLesson()">Complete a Lesson (Demo)</button>
+      </div>
+    </div>
+
+    <div id="non-student-note" class="role-note" style="display:none;">
+      XP, streaks, and coins are student features. This account's dashboard for its role is still to be built.
+    </div>
+  </div>
+
+  <!-- ACCOUNT SETTINGS TAB -->
+  <div class="tab-panel" id="tab-settings">
+
+    <div class="settings-section">
+      <h3>Editable</h3>
+      <form onsubmit="return saveSettings(event)">
+        <div class="field" id="userid-field">
+          <label>User ID</label>
+          <input id="set-userid" maxlength="30">
+          <div class="hint">Lowercase letters, numbers, and underscores only. Must be unique.</div>
+          <div class="err" id="userid-err">That User ID is already taken or contains invalid characters.</div>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>First Name</label>
+            <input id="set-fname">
+          </div>
+          <div class="field">
+            <label>Last Name</label>
+            <input id="set-lname">
+          </div>
+        </div>
+        <div class="field">
+          <label>Birthday <span style="font-weight:400; color:var(--muted);">(optional)</span></label>
+          <input type="date" id="set-birthday">
+        </div>
+        <div class="field">
+          <label>Profile Picture URL <span style="font-weight:400; color:var(--muted);">(optional)</span></label>
+          <input type="url" id="set-picture" placeholder="https://...">
+          <div class="hint">Leave blank to keep your initials avatar. (No file upload yet — that needs a backend.)</div>
+        </div>
+        <button type="submit" class="btn btn--solid">Save Changes</button>
+        <span class="save-msg" id="save-msg">Saved ✓</span>
+      </form>
+    </div>
+
+    <div class="settings-section">
+      <h3>Account Info</h3>
+      <div class="readonly-grid">
+        <div class="readonly-item">
+          <div class="label">Username</div>
+          <div class="value" id="ro-username">—</div>
+        </div>
+        <div class="readonly-item">
+          <div class="label">Email</div>
+          <div class="value" id="ro-email">—</div>
+        </div>
+        <div class="readonly-item">
+          <div class="label">Role</div>
+          <div class="value" id="ro-role">—</div>
+        </div>
+        <div class="readonly-item">
+          <div class="label">Status</div>
+          <div class="value" id="ro-status">—</div>
+        </div>
+        <div class="readonly-item">
+          <div class="label">Created At</div>
+          <div class="value" id="ro-created">—</div>
+        </div>
+        <div class="readonly-item">
+          <div class="label">Verified</div>
+          <div class="value" id="ro-verified">—</div>
+        </div>
+        <div class="readonly-item" style="grid-column: 1 / -1;">
+          <div class="label">Password Hash (SHA-256)</div>
+          <div class="value mono" id="ro-hash">—</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="auth.js"></script>
+<script src="classroom.js"></script>
+<script>
+  let user = getCurrentUser();
+  if (!user){
+    window.location.href = 'login.html';
+  }
+  if (user && user.role === 'teacher'){
+    window.location.href = 'teacher.html';
+  }
+
+  function showTab(name){
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+  }
+
+  function initialsFor(u){
+    if (u.firstName || u.lastName){
+      return ((u.firstName[0] || '') + (u.lastName[0] || '')).toUpperCase() || u.username[0].toUpperCase();
+    }
+    return u.username.slice(0, 2).toUpperCase();
+  }
+
+  function colorForString(str){
+    let hash = 0;
+    for (let i = 0; i < str.length; i++){ hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 60%, 45%)`;
+  }
+
+  function formatMinutes(mins){
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+
+  function renderAll(){
+    // welcome header
+    const displayName = user.firstName ? `${user.firstName} ${user.lastName}`.trim() : user.username;
+    document.getElementById('welcome-name').textContent = `Welcome back, ${displayName}`;
+    document.getElementById('badge-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+
+    const verifiedBadge = document.getElementById('badge-verified');
+    if (user.verified){
+      verifiedBadge.textContent = 'Verified';
+      verifiedBadge.className = 'badge badge--verified';
+    } else {
+      verifiedBadge.textContent = 'Unverified';
+      verifiedBadge.className = 'badge badge--unverified';
+    }
+
+    const avatarEl = document.getElementById('avatar');
+    if (user.profilePicture){
+      avatarEl.innerHTML = `<img src="${user.profilePicture}" alt="">`;
+      avatarEl.style.background = 'transparent';
+    } else {
+      avatarEl.textContent = initialsFor(user);
+      avatarEl.style.background = colorForString(user.userId);
+    }
+
+    // student stats vs other roles
+    if (user.role === 'student'){
+      document.getElementById('student-stats').style.display = 'block';
+      document.getElementById('non-student-note').style.display = 'none';
+
+      document.getElementById('stat-level').textContent = user.level;
+      document.getElementById('stat-coins').textContent = user.coins;
+      document.getElementById('stat-streak').textContent = user.streak;
+      document.getElementById('stat-time').textContent = formatMinutes(user.totalLearningMinutes);
+
+      const into = xpIntoLevel(user.xp);
+      document.getElementById('level-bar').style.width = into + '%';
+      document.getElementById('stat-xp-sub').textContent = `${into} / 100 XP`;
+    } else {
+      document.getElementById('student-stats').style.display = 'none';
+      document.getElementById('non-student-note').style.display = 'block';
+    }
+
+    // settings tab — editable fields
+    document.getElementById('set-userid').value = user.userId;
+    document.getElementById('set-fname').value = user.firstName;
+    document.getElementById('set-lname').value = user.lastName;
+    document.getElementById('set-birthday').value = user.birthday || '';
+    document.getElementById('set-picture').value = user.profilePicture || '';
+
+    // settings tab — read-only fields
+    document.getElementById('ro-username').textContent = user.username;
+    document.getElementById('ro-email').textContent = user.email;
+    document.getElementById('ro-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+    document.getElementById('ro-status').textContent = user.status;
+    document.getElementById('ro-created').textContent = new Date(user.createdAt).toLocaleString();
+    document.getElementById('ro-verified').textContent = user.verified ? 'Yes' : 'No';
+    document.getElementById('ro-hash').textContent = user.passwordHash;
+  }
+
+  function doDemoLesson(){
+    user = completeActivity(user, { minutes: 15, xpGain: 25, coinGain: 10 });
+    renderAll();
+  }
+
+  function saveSettings(e){
+    e.preventDefault();
+
+    const newId = document.getElementById('set-userid').value.trim().toLowerCase();
+    const idField = document.getElementById('userid-field');
+    const oldUserId = user.userId;
+
+    const validFormat = isValidUserIdFormat(newId);
+    const taken = isUserIdTaken(newId, oldUserId);
+
+    if (!validFormat || taken || !newId){
+      idField.classList.add('invalid');
+      return false;
+    }
+    idField.classList.remove('invalid');
+
+    user.userId = newId;
+    user.firstName = document.getElementById('set-fname').value.trim();
+    user.lastName = document.getElementById('set-lname').value.trim();
+    user.birthday = document.getElementById('set-birthday').value;
+    user.profilePicture = document.getElementById('set-picture').value.trim();
+
+    saveUser(user, oldUserId);
+    renameUserIdEverywhere(oldUserId, user.userId);
+    setCurrentUser(user.userId); // session key follows the (possibly changed) User ID
+
+    renderAll();
+
+    const msg = document.getElementById('save-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2000);
+
+    return false;
+  }
+
+  if (user) renderAll();
+</script>
+
+</body>
+</html>
