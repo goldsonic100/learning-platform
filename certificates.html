@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificates | Pebblio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ffffff; --bg-soft: #f6f7f9; --ink: #14171f; --muted: #5b6472;
+    --accent: #5b4fe8; --accent-dark: #453bc4; --border: #e4e6ec; --gold: #e8a72c;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; font-family:'Inter', system-ui, sans-serif; color:var(--ink); background:var(--bg-soft); }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 32px; background:var(--bg); border-bottom:1px solid var(--border); }
+  .topbar__logo-img{ height:30px; width:auto; display:block; }
+  .btn{ font-family:inherit; font-size:0.88rem; font-weight:600; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid var(--border); text-decoration:none; color:var(--ink); background:transparent; }
+  .btn:hover{ border-color:var(--muted); }
+
+  main{ max-width:820px; margin:0 auto; padding:40px 20px 90px; }
+  h1{ font-size:1.6rem; margin:0 0 6px; }
+  .subtitle{ color:var(--muted); margin:0 0 30px; font-size:0.95rem; }
+
+  .cert-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .cert{ text-align:center; border:1px solid var(--border); border-radius:16px; padding:26px 14px; background:var(--bg); }
+  .cert.locked{ opacity:0.35; }
+  .cert .icon{ font-size:2.2rem; margin-bottom:10px; }
+  .cert .title{ font-weight:700; font-size:0.92rem; }
+  .cert .desc{ font-size:0.78rem; color:var(--muted); margin-top:4px; }
+  .cert.unlocked{ border-color:var(--gold); box-shadow:0 4px 16px rgba(232,167,44,0.15); }
+
+  @media (max-width:600px){ .cert-grid{ grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html"><img src="pebblio-logo.png" alt="Pebblio" class="topbar__logo-img"></a>
+  <a href="dashboard.html" class="btn">← Back to Dashboard</a>
+</div>
+
+<main>
+  <h1>Your Certificate Wall</h1>
+  <p class="subtitle">Every badge here is calculated from your real account data — nothing is pre-filled or fake.</p>
+  <div class="cert-grid" id="cert-grid"></div>
+</main>
+
+<script src="auth.js"></script>
+<script src="classroom.js"></script>
+<script>
+  const user = getCurrentUser();
+  if (!user){ window.location.href = 'login.html'; }
+
+  function getAchievements(u){
+    return [
+      { icon:'🏫', title:'Joined a Class', desc:'Join your first class', unlocked: getClassesForStudent(u.userId).length > 0 },
+      { icon:'📖', title:'First Steps', desc:'Complete your first lesson', unlocked: (u.recentActivity||[]).length > 0 },
+      { icon:'🔥', title:'3-Day Streak', desc:'Learn 3 days in a row', unlocked: u.streak >= 3 },
+      { icon:'🔥', title:'7-Day Streak', desc:'Learn 7 days in a row', unlocked: u.streak >= 7 },
+      { icon:'🔥', title:'30-Day Streak', desc:'Learn 30 days in a row', unlocked: u.streak >= 30 },
+      { icon:'⭐', title:'Level 5', desc:'Reach level 5', unlocked: u.level >= 5 },
+      { icon:'🌟', title:'Level 10', desc:'Reach level 10', unlocked: u.level >= 10 },
+      { icon:'🏆', title:'Level 25', desc:'Reach level 25', unlocked: u.level >= 25 },
+      { icon:'💯', title:'500 XP Club', desc:'Earn 500 total XP', unlocked: u.xp >= 500 },
+      { icon:'🪙', title:'Coin Collector', desc:'Save up 100 coins', unlocked: u.coins >= 100 },
+      { icon:'⏱️', title:'One Hour Learned', desc:'Log 60+ minutes of learning', unlocked: u.totalLearningMinutes >= 60 },
+      { icon:'📚', title:'Five Hours Learned', desc:'Log 300+ minutes of learning', unlocked: u.totalLearningMinutes >= 300 },
+    ];
+  }
+
+  if (user){
+    document.getElementById('cert-grid').innerHTML = getAchievements(user).map(a => `
+      <div class="cert ${a.unlocked ? 'unlocked' : 'locked'}">
+        <div class="icon">${a.icon}</div>
+        <div class="title">${a.title}</div>
+        <div class="desc">${a.desc}</div>
+      </div>`).join('');
+  }
+</script>
+
+</body>
+</html>
