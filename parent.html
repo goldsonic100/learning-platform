@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Dashboard | Pebblio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ffffff; --bg-soft: #f6f7f9; --ink: #14171f; --muted: #5b6472;
+    --accent: #5b4fe8; --accent-dark: #453bc4; --border: #e4e6ec;
+    --danger: #d94848; --success: #1c9d5c; --gold: #e8a72c;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; font-family:'Inter', system-ui, sans-serif; color:var(--ink); background:var(--bg-soft); }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 32px; background:var(--bg); border-bottom:1px solid var(--border); }
+  .topbar__logo-img{ height:30px; width:auto; display:block; }
+  .topbar__right{ display:flex; align-items:center; gap:14px; }
+  .btn{ font-family:inherit; font-size:0.86rem; font-weight:600; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid transparent; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .15s ease, border-color .15s ease; }
+  .btn--ghost{ color:var(--ink); background:transparent; border-color:var(--border); }
+  .btn--ghost:hover{ border-color:var(--muted); }
+  .btn--solid{ color:#fff; background:var(--accent); }
+  .btn--solid:hover{ background:var(--accent-dark); }
+  .btn--sm{ padding:6px 12px; font-size:0.78rem; }
+
+  main{ max-width: 1000px; margin:0 auto; padding: 28px 20px 90px; }
+
+  .welcome{ display:flex; align-items:center; gap:16px; background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:20px 24px; margin-bottom:22px; }
+  .avatar{ width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; flex-shrink:0; overflow:hidden; }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
+  .welcome__name{ font-size:1.15rem; font-weight:700; margin:0 0 4px; }
+  .badge{ font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:999px; background:#ece9fd; color:var(--accent-dark); text-transform:uppercase; letter-spacing:.02em; }
+
+  .tabs{ display:flex; gap:4px; margin-bottom:22px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .tab-btn{ font-family:inherit; font-size:0.86rem; font-weight:600; background:none; border:none; cursor:pointer; padding:11px 4px; margin-right:18px; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; }
+  .tab-btn.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .card{ background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:18px; }
+  .card h3{ margin:0 0 14px; font-size:1rem; }
+  .card .empty{ color:var(--muted); font-size:0.88rem; padding:6px 0; }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:0.83rem; font-weight:600; margin-bottom:6px; }
+  .field input, .field select{ width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.92rem; font-family:inherit; }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(91,79,232,.12); }
+  .row-2{ display:flex; gap:12px; }
+  .row-2 .field{ flex:1; }
+  .err-msg{ color:var(--danger); font-size:0.85rem; margin:-6px 0 12px; display:none; }
+  .err-msg.show{ display:block; }
+  .cap-note{ font-size:0.78rem; color:var(--muted); margin-top:6px; }
+
+  .child-card{ display:flex; align-items:center; gap:14px; border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .child-avatar{ width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; flex-shrink:0; }
+  .child-name{ font-weight:700; font-size:0.94rem; }
+  .child-meta{ font-size:0.8rem; color:var(--muted); }
+  .pending-pill{ font-size:0.72rem; font-weight:700; background:#fff3d6; color:#8a6400; padding:3px 10px; border-radius:999px; margin-left:auto; }
+
+  .assignment-row, .agenda-item, .msg-item{ padding:10px 0; border-top:1px solid var(--border); font-size:0.88rem; }
+  .assignment-row:first-of-type, .agenda-item:first-of-type, .msg-item:first-of-type{ border-top:none; }
+  .assignment-row{ display:flex; align-items:center; justify-content:space-between; }
+  .agenda-item{ display:flex; justify-content:space-between; }
+  .agenda-date{ font-family:'JetBrains Mono', monospace; color:var(--muted); font-size:0.8rem; }
+  .type-pill{ font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:999px; text-transform:uppercase; background:#eef1ff; color:var(--accent-dark); margin-right:8px; }
+  .grade-pill{ font-weight:700; font-size:0.8rem; }
+  .grade-pill.ungraded{ color:var(--muted); font-weight:500; }
+
+  .badge-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .achievement{ text-align:center; border:1px solid var(--border); border-radius:14px; padding:18px 10px; }
+  .achievement.locked{ opacity:0.4; }
+  .achievement .icon{ font-size:1.6rem; margin-bottom:6px; }
+  .achievement .title{ font-weight:700; font-size:0.8rem; }
+  .achievement .desc{ font-size:0.72rem; color:var(--muted); margin-top:2px; }
+
+  .msg-item .subject{ font-weight:700; font-size:0.92rem; }
+  .msg-item .meta{ font-size:0.78rem; color:var(--muted); margin-bottom:4px; }
+
+  .readonly-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 24px; }
+  .readonly-item .label{ font-size:0.75rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.03em; margin-bottom:4px; }
+  .readonly-item .value{ font-size:0.9rem; word-break:break-all; }
+  .readonly-item .value.mono{ font-family:'JetBrains Mono', monospace; font-size:0.78rem; }
+  .save-msg{ font-size:0.85rem; color:var(--success); margin-left:10px; display:none; }
+  .save-msg.show{ display:inline; }
+  .field.invalid input{ border-color:var(--danger); }
+  .err{ font-size:0.78rem; color:var(--danger); margin-top:4px; display:none; }
+  .field.invalid .err{ display:block; }
+
+  @media (max-width:760px){
+    .readonly-grid{ grid-template-columns:1fr; }
+    .badge-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html"><img src="pebblio-logo.png" alt="Pebblio" class="topbar__logo-img"></a>
+  <div class="topbar__right">
+    <a href="index.html" class="btn btn--ghost">Home</a>
+    <button class="btn btn--solid" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<main>
+
+  <div class="welcome">
+    <div class="avatar" id="avatar">?</div>
+    <div>
+      <div class="welcome__name" id="welcome-name">Welcome back</div>
+      <span class="badge">Parent</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('children')">My Children</button>
+    <button class="tab-btn" onclick="showTab('grades')">Grades & Progress</button>
+    <button class="tab-btn" onclick="showTab('assign')">Assign Work</button>
+    <button class="tab-btn" onclick="showTab('certificates')">Certificates</button>
+    <button class="tab-btn" onclick="showTab('calendar')">Calendar</button>
+    <button class="tab-btn" onclick="showTab('inbox')">Inbox</button>
+    <button class="tab-btn" onclick="showTab('billing')">Billing</button>
+    <button class="tab-btn" onclick="showTab('settings')">Settings</button>
+  </div>
+
+  <!-- MY CHILDREN -->
+  <div class="tab-panel active" id="tab-children">
+    <div class="card">
+      <h3>Add a child</h3>
+      <p style="font-size:0.85rem; color:var(--muted); margin-top:-8px;">You'll need your child's email <strong>and</strong> password — this proves it's really your child's account. They'll still get a notification and have to approve it themselves before you can see anything.</p>
+      <form onsubmit="return handleAddChild(event)">
+        <div class="row-2">
+          <div class="field"><label>Child's Email</label><input type="email" id="child-email" required></div>
+          <div class="field"><label>Child's Password</label><input type="password" id="child-password" required></div>
+        </div>
+        <div class="err-msg" id="add-child-err"></div>
+        <button class="btn btn--solid" type="submit">Send Request</button>
+      </form>
+      <div class="cap-note" id="cap-note"></div>
+    </div>
+
+    <div class="card">
+      <h3>Pending requests</h3>
+      <div id="pending-list"><div class="empty">No pending requests.</div></div>
+    </div>
+
+    <div class="card">
+      <h3>Your children</h3>
+      <div id="children-list"><div class="empty">No linked children yet.</div></div>
+    </div>
+  </div>
+
+  <!-- GRADES & PROGRESS -->
+  <div class="tab-panel" id="tab-grades">
+    <div class="card">
+      <div class="field"><label>Select a child</label><select id="grades-child" onchange="renderGrades()"></select></div>
+      <div id="grades-list"><div class="empty">No linked children yet.</div></div>
+    </div>
+  </div>
+
+  <!-- ASSIGN WORK -->
+  <div class="tab-panel" id="tab-assign">
+    <div class="card">
+      <h3>Assign something to a child</h3>
+      <p style="font-size:0.85rem; color:var(--muted); margin-top:-8px;">Parents can assign existing-style work directly (no need to create a course).</p>
+      <form onsubmit="return handleAssignWork(event)">
+        <div class="row-2">
+          <div class="field"><label>Child</label><select id="asg-child" required></select></div>
+          <div class="field"><label>Type</label>
+            <select id="asg-type">
+              <option value="assignment">Assignment</option>
+              <option value="test">Test</option>
+              <option value="trainer">Trainer</option>
+            </select>
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Title</label><input id="asg-title" required></div>
+          <div class="field"><label>Due Date</label><input type="date" id="asg-due" required></div>
+        </div>
+        <button class="btn btn--solid" type="submit">Assign</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>What you've assigned</h3>
+      <div id="assigned-list"><div class="empty">Nothing assigned yet.</div></div>
+    </div>
+  </div>
+
+  <!-- CERTIFICATES -->
+  <div class="tab-panel" id="tab-certificates">
+    <div class="card">
+      <div class="field"><label>Select a child</label><select id="cert-child" onchange="renderCertificates()"></select></div>
+      <div class="badge-grid" id="cert-grid"></div>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="tab-panel" id="tab-calendar">
+    <div class="card">
+      <h3>Everything due, across all your children</h3>
+      <div id="calendar-list"><div class="empty">Nothing scheduled.</div></div>
+    </div>
+  </div>
+
+  <!-- INBOX -->
+  <div class="tab-panel" id="tab-inbox">
+    <div class="card">
+      <h3>Progress reports</h3>
+      <p style="font-size:0.85rem; color:var(--muted); margin-top:-8px;">Generate a snapshot of a child's progress and send it to your own inbox below.</p>
+      <div class="row-2">
+        <div class="field"><label>Child</label><select id="report-child"></select></div>
+        <div class="field" style="align-self:flex-end;"><button class="btn btn--solid btn--sm" onclick="sendProgressReport()">Send Report to My Inbox</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Inbox</h3>
+      <div id="inbox-list"><div class="empty">No messages.</div></div>
+    </div>
+  </div>
+
+  <!-- BILLING -->
+  <div class="tab-panel" id="tab-billing">
+    <div class="card">
+      <h3>Billing</h3>
+      <p class="empty">Payments and the paid plan (more than 3 children, unlimited class sizes for teachers, etc.) haven't been built yet — saved for later.</p>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="tab-panel" id="tab-settings">
+    <div class="card">
+      <h3>Editable</h3>
+      <form onsubmit="return saveSettings(event)">
+        <div class="field" id="userid-field">
+          <label>User ID</label>
+          <input id="set-userid" maxlength="30">
+          <div class="err" id="userid-err">That User ID is already taken or contains invalid characters.</div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>First Name</label><input id="set-fname"></div>
+          <div class="field"><label>Last Name</label><input id="set-lname"></div>
+        </div>
+        <div class="field"><label>Profile Picture URL (optional)</label><input type="url" id="set-picture" placeholder="https://..."></div>
+        <button type="submit" class="btn btn--solid">Save Changes</button>
+        <span class="save-msg" id="save-msg">Saved ✓</span>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Account Info</h3>
+      <div class="readonly-grid">
+        <div class="readonly-item"><div class="label">Username</div><div class="value" id="ro-username">—</div></div>
+        <div class="readonly-item"><div class="label">Email</div><div class="value" id="ro-email">—</div></div>
+        <div class="readonly-item"><div class="label">Status</div><div class="value" id="ro-status">—</div></div>
+        <div class="readonly-item"><div class="label">Created At</div><div class="value" id="ro-created">—</div></div>
+        <div class="readonly-item"><div class="label">Verified</div><div class="value" id="ro-verified">—</div></div>
+        <div class="readonly-item" style="grid-column:1/-1;"><div class="label">Password Hash (SHA-256)</div><div class="value mono" id="ro-hash">—</div></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="auth.js"></script>
+<script src="classroom.js"></script>
+<script src="family.js"></script>
+<script>
+  let user = getCurrentUser();
+  if (!user){ window.location.href = 'login.html'; }
+  if (user && user.role !== 'parent'){ window.location.href = dashboardUrlFor(user.role); }
+
+  document.getElementById('cap-note').textContent =
+    `You can link up to ${MAX_CHILDREN_FREE} children on the free plan.`;
+
+  function showTab(name){
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    renderAll();
+  }
+
+  function initialsFor(u){
+    if (u.firstName || u.lastName) return ((u.firstName[0]||'') + (u.lastName[0]||'')).toUpperCase() || u.username[0].toUpperCase();
+    return u.username.slice(0,2).toUpperCase();
+  }
+  function colorForString(str){
+    let hash = 0;
+    for (let i=0;i<str.length;i++){ hash = str.charCodeAt(i) + ((hash<<5)-hash); }
+    return `hsl(${Math.abs(hash)%360}, 60%, 45%)`;
+  }
+  function formatMinutes(mins){
+    const h = Math.floor(mins/60), m = mins%60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+  function childDisplayName(c){
+    return c.firstName ? `${c.firstName} ${c.lastName}`.trim() : c.username;
+  }
+
+  function renderHeader(){
+    const displayName = user.firstName ? `${user.firstName} ${user.lastName}`.trim() : user.username;
+    document.getElementById('welcome-name').textContent = `Welcome back, ${displayName}`;
+    const avatarEl = document.getElementById('avatar');
+    if (user.profilePicture){
+      avatarEl.innerHTML = `<img src="${user.profilePicture}">`;
+      avatarEl.style.background = 'transparent';
+    } else {
+      avatarEl.textContent = initialsFor(user);
+      avatarEl.style.background = colorForString(user.userId);
+    }
+  }
+
+  /* ---------- MY CHILDREN ---------- */
+
+  async function handleAddChild(e){
+    e.preventDefault();
+    const email = document.getElementById('child-email').value.trim();
+    const password = document.getElementById('child-password').value;
+    const errEl = document.getElementById('add-child-err');
+
+    const result = await requestChildLink(user, email, password);
+    if (!result.ok){
+      errEl.textContent = result.error;
+      errEl.classList.add('show');
+      return false;
+    }
+    errEl.classList.remove('show');
+    document.getElementById('child-email').value = '';
+    document.getElementById('child-password').value = '';
+    alert("Request sent! Your child needs to approve it from their inbox before you'll see anything.");
+    renderAll();
+    return false;
+  }
+
+  function renderChildren(){
+    const children = getApprovedChildren(user.userId);
+    const el = document.getElementById('children-list');
+    el.innerHTML = children.length === 0
+      ? '<div class="empty">No linked children yet.</div>'
+      : children.map(c => `
+          <div class="child-card">
+            <div class="child-avatar" style="background:${colorForString(c.userId)}">${initialsFor(c)}</div>
+            <div>
+              <div class="child-name">${childDisplayName(c)}</div>
+              <div class="child-meta">Level ${c.level} · 🔥 ${c.streak} day streak</div>
+            </div>
+          </div>`).join('');
+
+    const pendingEl = document.getElementById('pending-list');
+    const pending = getPendingLinksForParent(user.userId);
+    pendingEl.innerHTML = pending.length === 0
+      ? '<div class="empty">No pending requests.</div>'
+      : pending.map(l => {
+          const child = getUsers().find(u => u.userId === l.childUserId);
+          return `
+            <div class="child-card">
+              <div class="child-avatar" style="background:var(--muted)">?</div>
+              <div><div class="child-name">${child ? child.email : 'Unknown'}</div><div class="child-meta">Waiting for approval</div></div>
+              <span class="pending-pill">Pending</span>
+            </div>`;
+        }).join('');
+  }
+
+  function populateChildDropdowns(){
+    const children = getApprovedChildren(user.userId);
+    const opts = children.map(c => `<option value="${c.userId}">${childDisplayName(c)}</option>`).join('');
+    const emptyOpt = '<option value="">— link a child first —</option>';
+    ['grades-child','asg-child','cert-child','report-child'].forEach(id => {
+      const sel = document.getElementById(id);
+      const current = sel.value;
+      sel.innerHTML = children.length ? opts : emptyOpt;
+      if (children.some(c => c.userId === current)) sel.value = current;
+    });
+  }
+
+  /* ---------- GRADES & PROGRESS ---------- */
+
+  function renderGrades(){
+    const childId = document.getElementById('grades-child').value;
+    const el = document.getElementById('grades-list');
+    if (!childId){ el.innerHTML = '<div class="empty">No linked children yet.</div>'; return; }
+
+    const assignments = getAssignmentsForStudent(childId);
+    if (assignments.length === 0){ el.innerHTML = '<div class="empty">No assignments yet for this child.</div>'; return; }
+
+    const graded = assignments.filter(a => getGrade(a.assignmentId, childId) !== null).length;
+    el.innerHTML = `<p style="font-size:0.85rem; color:var(--muted); margin-top:0;">${graded}/${assignments.length} assignments completed</p>` +
+      assignments.map(a => {
+        const score = getGrade(a.assignmentId, childId);
+        const cls = a.classId ? getClassById(a.classId) : null;
+        return `
+          <div class="assignment-row">
+            <span><span class="type-pill">${a.type}</span>${a.title}${cls ? ' — ' + cls.className : ''}</span>
+            <span class="grade-pill ${score === null ? 'ungraded' : ''}">${score === null ? 'Not graded' : score + '%'}</span>
+          </div>`;
+      }).join('');
+  }
+
+  /* ---------- ASSIGN WORK ---------- */
+
+  function handleAssignWork(e){
+    e.preventDefault();
+    const childId = document.getElementById('asg-child').value;
+    if (!childId){ alert('Link a child first.'); return false; }
+    createAssignment(user.userId, {
+      directStudentId: childId,
+      title: document.getElementById('asg-title').value.trim(),
+      type: document.getElementById('asg-type').value,
+      dueDate: document.getElementById('asg-due').value
+    });
+    e.target.reset();
+    renderAll();
+    return false;
+  }
+
+  function renderAssignedWork(){
+    const assignments = getAssignmentsByTeacher(user.userId); // "teacher" field just means creator
+    const el = document.getElementById('assigned-list');
+    el.innerHTML = assignments.length === 0
+      ? '<div class="empty">Nothing assigned yet.</div>'
+      : assignments.map(a => {
+          const child = getUsers().find(u => u.userId === a.directStudentId);
+          return `
+            <div class="assignment-row">
+              <span><span class="type-pill">${a.type}</span><strong>${a.title}</strong> — ${child ? childDisplayName(child) : 'Unknown'}</span>
+              <span style="color:var(--muted); font-size:0.82rem;">Due ${a.dueDate || '—'}</span>
+            </div>`;
+        }).join('');
+  }
+
+  /* ---------- CERTIFICATES ---------- */
+
+  function getAchievementsFor(u){
+    return [
+      { icon:'🏫', title:'Joined a Class', desc:'Join a first class', unlocked: getClassesForStudent(u.userId).length > 0 },
+      { icon:'📖', title:'First Steps', desc:'Complete a first lesson', unlocked: (u.recentActivity||[]).length > 0 },
+      { icon:'🔥', title:'3-Day Streak', desc:'3 days in a row', unlocked: u.streak >= 3 },
+      { icon:'🔥', title:'7-Day Streak', desc:'7 days in a row', unlocked: u.streak >= 7 },
+      { icon:'⭐', title:'Level 5', desc:'Reach level 5', unlocked: u.level >= 5 },
+      { icon:'🌟', title:'Level 10', desc:'Reach level 10', unlocked: u.level >= 10 },
+      { icon:'💯', title:'500 XP Club', desc:'Earn 500 XP', unlocked: u.xp >= 500 },
+      { icon:'🪙', title:'Coin Collector', desc:'Save 100 coins', unlocked: u.coins >= 100 },
+      { icon:'⏱️', title:'One Hour Learned', desc:'60+ minutes logged', unlocked: u.totalLearningMinutes >= 60 },
+    ];
+  }
+
+  function renderCertificates(){
+    const childId = document.getElementById('cert-child').value;
+    const el = document.getElementById('cert-grid');
+    const child = getUsers().find(u => u.userId === childId);
+    if (!child){ el.innerHTML = '<div class="empty">No linked children yet.</div>'; return; }
+    el.innerHTML = getAchievementsFor(child).map(a => `
+      <div class="achievement ${a.unlocked ? '' : 'locked'}">
+        <div class="icon">${a.icon}</div>
+        <div class="title">${a.title}</div>
+        <div class="desc">${a.desc}</div>
+      </div>`).join('');
+  }
+
+  /* ---------- CALENDAR ---------- */
+
+  function renderCalendar(){
+    const children = getApprovedChildren(user.userId);
+    let all = [];
+    children.forEach(c => {
+      getAssignmentsForStudent(c.userId).forEach(a => all.push({ ...a, childName: childDisplayName(c) }));
+    });
+    all = all.filter(a => a.dueDate).sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+    const el = document.getElementById('calendar-list');
+    el.innerHTML = all.length === 0
+      ? '<div class="empty">Nothing scheduled.</div>'
+      : all.map(a => `<div class="agenda-item"><span><span class="type-pill">${a.type}</span>${a.title} — ${a.childName}</span><span class="agenda-date">${a.dueDate}</span></div>`).join('');
+  }
+
+  /* ---------- INBOX / PROGRESS REPORTS ---------- */
+
+  function sendProgressReport(){
+    const childId = document.getElementById('report-child').value;
+    const child = getUsers().find(u => u.userId === childId);
+    if (!child){ alert('Link a child first.'); return; }
+
+    const assignments = getAssignmentsForStudent(child.userId);
+    const graded = assignments.filter(a => getGrade(a.assignmentId, child.userId) !== null).length;
+
+    sendMessage({
+      fromUserId: user.userId,
+      toUserId: user.userId,
+      subject: `Progress report — ${childDisplayName(child)}`,
+      body: `Level ${child.level} (${child.xp} XP) · 🔥 ${child.streak}-day streak · ${formatMinutes(child.totalLearningMinutes)} learned · ${graded}/${assignments.length} assignments completed.`
+    });
+    renderAll();
+  }
+
+  function renderParentInbox(){
+    const inbox = getInbox(user.userId).filter(m => m.toUserId === user.userId);
+    const el = document.getElementById('inbox-list');
+    el.innerHTML = inbox.length === 0
+      ? '<div class="empty">No messages.</div>'
+      : inbox.map(m => `
+          <div class="msg-item">
+            <div class="subject">${m.subject}</div>
+            <div class="meta">${new Date(m.createdAt).toLocaleString()}</div>
+            <div>${m.body}</div>
+          </div>`).join('');
+    inbox.forEach(m => markMessageRead(m.messageId));
+  }
+
+  /* ---------- SETTINGS ---------- */
+
+  function renderSettings(){
+    document.getElementById('set-userid').value = user.userId;
+    document.getElementById('set-fname').value = user.firstName;
+    document.getElementById('set-lname').value = user.lastName;
+    document.getElementById('set-picture').value = user.profilePicture || '';
+
+    document.getElementById('ro-username').textContent = user.username;
+    document.getElementById('ro-email').textContent = user.email;
+    document.getElementById('ro-status').textContent = user.status;
+    document.getElementById('ro-created').textContent = new Date(user.createdAt).toLocaleString();
+    document.getElementById('ro-verified').textContent = user.verified ? 'Yes' : 'No';
+    document.getElementById('ro-hash').textContent = user.passwordHash;
+  }
+
+  function saveSettings(e){
+    e.preventDefault();
+    const newId = document.getElementById('set-userid').value.trim().toLowerCase();
+    const idField = document.getElementById('userid-field');
+    const oldUserId = user.userId;
+
+    if (!isValidUserIdFormat(newId) || isUserIdTaken(newId, oldUserId) || !newId){
+      idField.classList.add('invalid');
+      return false;
+    }
+    idField.classList.remove('invalid');
+
+    user.userId = newId;
+    user.firstName = document.getElementById('set-fname').value.trim();
+    user.lastName = document.getElementById('set-lname').value.trim();
+    user.profilePicture = document.getElementById('set-picture').value.trim();
+
+    saveUser(user, oldUserId);
+    renameUserIdEverywhere(oldUserId, user.userId);
+    setCurrentUser(user.userId);
+
+    renderAll();
+    const msg = document.getElementById('save-msg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2000);
+    return false;
+  }
+
+  /* ---------- MASTER RENDER ---------- */
+
+  function renderAll(){
+    renderHeader();
+    populateChildDropdowns();
+    renderChildren();
+    renderGrades();
+    renderAssignedWork();
+    renderCertificates();
+    renderCalendar();
+    renderParentInbox();
+    renderSettings();
+  }
+
+  if (user) renderAll();
+</script>
+
+</body>
+</html>
