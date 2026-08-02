@@ -315,6 +315,8 @@
   if (!user){ window.location.href = 'login.html'; }
   if (user && user.role === 'teacher'){ window.location.href = 'teacher.html'; }
   if (user && user.role === 'parent'){ window.location.href = 'parent.html'; }
+  if (user && user.role === 'admin'){ window.location.href = 'admin.html'; }
+  if (user) touchLastSeen(user);
 
   const DEMO_LESSONS = ['Intro to Fractions', 'Reading Comprehension: Ch. 3', 'Spanish Vocabulary Quiz', 'Photosynthesis Basics', 'Basic Algebra Review', 'World War II Timeline'];
 
