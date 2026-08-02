@@ -108,6 +108,10 @@ function getCoursesByTeacher(teacherUserId){
   return readList(COURSES_KEY).filter(c => c.teacherUserId === teacherUserId);
 }
 
+function getAllCourses(){
+  return readList(COURSES_KEY);
+}
+
 /* ---------- ASSIGNMENTS ---------- */
 
 function createAssignment(creatorUserId, { classId = null, directStudentId = null, courseId, title, type, dueDate }){
