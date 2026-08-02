@@ -41,7 +41,31 @@ function logout(){
 function dashboardUrlFor(role){
   if(role === 'teacher') return 'teacher.html';
   if(role === 'parent') return 'parent.html';
+  if(role === 'admin') return 'admin.html';
   return 'dashboard.html';
+}
+
+/* The site owner's account is always an admin, even if they originally
+   signed up as a student/teacher/parent, or the rule is added after
+   they already had an account. */
+const OWNER_ADMIN_EMAIL = 'goldsonic100@gmail.com';
+
+function ensureOwnerIsAdmin(){
+  const users = getUsers();
+  const owner = users.find(u => u.email.trim().toLowerCase() === OWNER_ADMIN_EMAIL);
+  if(owner && owner.role !== 'admin'){
+    owner.role = 'admin';
+    saveUsers(users);
+  }
+}
+document.addEventListener('DOMContentLoaded', ensureOwnerIsAdmin);
+
+/* Updates a "last seen" timestamp for whoever's logged in on THIS
+   browser. This only ever reflects accounts used on this device —
+   it can't see anyone else's real activity across the internet. */
+function touchLastSeen(user){
+  user.lastSeenAt = new Date().toISOString();
+  saveUser(user);
 }
 
 function saveUser(updatedUser, previousUserId = null){
@@ -105,13 +129,14 @@ async function createAccount({ username, email, password, role, firstName, lastN
   const userId = slugifyUserId(username);
   const passwordHash = await sha256Hex(password);
   const today = new Date().toISOString();
+  const effectiveRole = email.trim().toLowerCase() === OWNER_ADMIN_EMAIL ? 'admin' : role;
 
   const user = {
     userId,
     username,
     email,
     passwordHash,
-    role,
+    role: effectiveRole,
     createdAt: today,
     verified: true,          // true because they completed the email code step
     profilePicture: '',      // optional image URL, empty = show initials avatar
@@ -181,6 +206,41 @@ function completeActivity(user, { minutes = 15, xpGain = 25, coinGain = 10 } = {
   return user;
 }
 
+/* ---------- admin actions ----------
+   These assume the caller has already confirmed the current user
+   is actually an admin — there's no server to enforce that for us,
+   so every admin page checks user.role === 'admin' before showing
+   any of this. */
+
+function deleteUserAccount(userId){
+  const users = getUsers().filter(u => u.userId !== userId);
+  saveUsers(users);
+
+  // strip them out of any class rosters so they don't linger as a ghost ID
+  const classes = readList(CLASSES_KEY);
+  classes.forEach(c => { c.studentIds = c.studentIds.filter(id => id !== userId); });
+  writeList(CLASSES_KEY, classes);
+  // Note: this does NOT cascade-delete a teacher's classes/courses/assignments,
+  // or a parent's family links — those remain, just no longer resolving to a
+  // real account. Good enough for a demo; a real product would clean those up too.
+}
+
+async function adminResetPassword(userId, newPassword){
+  const users = getUsers();
+  const target = users.find(u => u.userId === userId);
+  if(!target) return false;
+  target.passwordHash = await sha256Hex(newPassword);
+  saveUsers(users);
+  return true;
+}
+
+function setUserRole(userId, newRole){
+  const users = getUsers();
+  const target = users.find(u => u.userId === userId);
+  if(!target) return;
+  target.role = newRole;
+  saveUsers(users);
+}
 /* ---------- nav bar swap ----------
    On pages with the normal Log In / Sign Up buttons, call this on
    load. If someone's logged in, it swaps those buttons for
