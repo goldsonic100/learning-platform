@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | Pebblio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ffffff; --bg-soft: #f6f7f9; --ink: #14171f; --muted: #5b6472;
+    --accent: #5b4fe8; --accent-dark: #453bc4; --border: #e4e6ec;
+    --danger: #d94848; --success: #1c9d5c; --gold: #e8a72c;
+  }
+  *{ box-sizing: border-box; }
+  body{ margin:0; font-family:'Inter', system-ui, sans-serif; color:var(--ink); background:var(--bg-soft); }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 32px; background:var(--ink); border-bottom:1px solid var(--border); }
+  .topbar__logo-img{ height:30px; width:auto; display:block; filter:brightness(0) invert(1); }
+  .topbar__right{ display:flex; align-items:center; gap:14px; }
+  .btn{ font-family:inherit; font-size:0.86rem; font-weight:600; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid transparent; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .15s ease, border-color .15s ease; }
+  .btn--ghost{ color:#fff; background:transparent; border-color:#3a3d47; }
+  .btn--ghost:hover{ border-color:#666; }
+  .btn--solid{ color:#fff; background:var(--accent); }
+  .btn--solid:hover{ background:var(--accent-dark); }
+  .btn--sm{ padding:6px 12px; font-size:0.78rem; }
+  .btn--danger{ color:var(--danger); background:#fdeceb; border-color:#f6cfcc; }
+
+  main{ max-width: 1080px; margin:0 auto; padding: 28px 20px 90px; }
+
+  .welcome{ display:flex; align-items:center; gap:16px; background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:20px 24px; margin-bottom:22px; }
+  .avatar{ width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; flex-shrink:0; background:var(--ink); }
+  .welcome__name{ font-size:1.15rem; font-weight:700; margin:0 0 4px; }
+  .badge{ font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:999px; background:var(--ink); color:#fff; text-transform:uppercase; letter-spacing:.02em; }
+
+  .tabs{ display:flex; gap:4px; margin-bottom:22px; border-bottom:1px solid var(--border); overflow-x:auto; }
+  .tab-btn{ font-family:inherit; font-size:0.86rem; font-weight:600; background:none; border:none; cursor:pointer; padding:11px 4px; margin-right:18px; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; }
+  .tab-btn.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .card{ background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:18px; }
+  .card h3{ margin:0 0 14px; font-size:1rem; }
+  .card .empty{ color:var(--muted); font-size:0.88rem; padding:6px 0; }
+  .note{ font-size:0.82rem; color:var(--muted); margin:-6px 0 16px; line-height:1.5; }
+  .note.warn{ background:#fff8e6; border:1px solid #f0dca0; border-radius:10px; padding:12px 14px; color:#7a5c00; }
+
+  .stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+  .stat-card{ background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:18px; }
+  .stat-card__label{ font-size:0.72rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px; }
+  .stat-card__value{ font-size:1.5rem; font-weight:700; }
+
+  table.users-table{ width:100%; border-collapse:collapse; font-size:0.85rem; }
+  table.users-table th, table.users-table td{ border-bottom:1px solid var(--border); padding:9px 8px; text-align:left; vertical-align:middle; }
+  table.users-table th{ font-size:0.72rem; text-transform:uppercase; letter-spacing:.02em; color:var(--muted); }
+  table.users-table select{ font-family:inherit; font-size:0.82rem; padding:4px 6px; border:1px solid var(--border); border-radius:6px; }
+  .filter-row{ display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .filter-chip{ font-family:inherit; font-size:0.8rem; font-weight:600; padding:6px 14px; border-radius:999px; border:1px solid var(--border); background:var(--bg); cursor:pointer; color:var(--muted); }
+  .filter-chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .school-card{ border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .school-card__name{ font-weight:700; font-size:0.95rem; margin-bottom:4px; }
+  .school-card__meta{ font-size:0.82rem; color:var(--muted); }
+
+  .course-row{ display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; background:var(--bg); cursor:grab; }
+  .course-row.dragging{ opacity:0.4; }
+  .course-row .handle{ color:var(--muted); }
+  .course-row .meta{ font-size:0.78rem; color:var(--muted); margin-left:auto; }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:0.83rem; font-weight:600; margin-bottom:6px; }
+  .field input, .field select, .field textarea{ width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.92rem; font-family:inherit; }
+  .field textarea{ resize:vertical; min-height:70px; }
+  .row-2{ display:flex; gap:12px; }
+  .row-2 .field{ flex:1; }
+
+  .log-item{ padding:9px 0; border-top:1px solid var(--border); font-size:0.85rem; display:flex; justify-content:space-between; gap:10px; }
+  .log-item:first-of-type{ border-top:none; }
+  .log-type{ font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:999px; background:#eef1ff; color:var(--accent-dark); text-transform:uppercase; margin-right:8px; }
+  .log-time{ font-family:'JetBrains Mono', monospace; color:var(--muted); font-size:0.76rem; white-space:nowrap; }
+
+  @media (max-width:760px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html"><img src="pebblio-logo.png" alt="Pebblio" class="topbar__logo-img"></a>
+  <div class="topbar__right">
+    <a href="dashboard.html" class="btn btn--ghost">👤 View Regular Dashboard</a>
+    <button class="btn btn--solid" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<main>
+
+  <div class="welcome">
+    <div class="avatar" id="avatar">?</div>
+    <div>
+      <div class="welcome__name" id="welcome-name">Welcome back</div>
+      <span class="badge">🛡️ Admin</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
+    <button class="tab-btn" onclick="showTab('users')">User Management</button>
+    <button class="tab-btn" onclick="showTab('schools')">Schools</button>
+    <button class="tab-btn" onclick="showTab('courses')">Courses</button>
+    <button class="tab-btn" onclick="showTab('broadcast')">Broadcast</button>
+    <button class="tab-btn" onclick="showTab('activity')">Activity Log</button>
+    <button class="tab-btn" onclick="showTab('settings')">Settings</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="note warn">
+      Honest limitation: this dashboard can only see accounts and activity that exist <strong>on this browser</strong> (localStorage). It can't show real IP addresses, truly global "currently online" visitor counts, or genuine security intrusion logs — none of that is possible without a real backend server watching real network traffic. Everything below is 100% real, just scoped to this device.
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-card__label">Total Users</div><div class="stat-card__value" id="ov-total">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">New Users (7d)</div><div class="stat-card__value" id="ov-new7">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Active Here (1h)</div><div class="stat-card__value" id="ov-active1h">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Active Here (24h)</div><div class="stat-card__value" id="ov-active24h">0</div></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-card__label">Students</div><div class="stat-card__value" id="ov-students">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Teachers</div><div class="stat-card__value" id="ov-teachers">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Parents</div><div class="stat-card__value" id="ov-parents">0</div></div>
+      <div class="stat-card"><div class="stat-card__label">Overdue & Ungraded</div><div class="stat-card__value" id="ov-issues">0</div></div>
+    </div>
+    <div class="card">
+      <h3>Quick actions</h3>
+      <button class="btn btn--solid btn--sm" onclick="showTab('users')">Manage Users</button>
+      <button class="btn btn--ghost btn--sm" onclick="showTab('broadcast')">Send an Announcement</button>
+      <button class="btn btn--ghost btn--sm" onclick="renderAll()">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <!-- USER MANAGEMENT -->
+  <div class="tab-panel" id="tab-users">
+    <div class="card">
+      <h3>All Users</h3>
+      <div class="filter-row" id="role-filters">
+        <button class="filter-chip active" data-role="all" onclick="setRoleFilter('all')">All</button>
+        <button class="filter-chip" data-role="student" onclick="setRoleFilter('student')">Students</button>
+        <button class="filter-chip" data-role="teacher" onclick="setRoleFilter('teacher')">Teachers</button>
+        <button class="filter-chip" data-role="parent" onclick="setRoleFilter('parent')">Parents</button>
+        <button class="filter-chip" data-role="admin" onclick="setRoleFilter('admin')">Admins</button>
+      </div>
+      <p class="note">"Money Spent" is always $0.00 — there's no real billing/payment system built yet, so this is honestly zero for everyone, not a placeholder number.</p>
+      <div style="overflow-x:auto;">
+        <table class="users-table">
+          <thead><tr><th>Email</th><th>Username</th><th>Role</th><th>Money Spent</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHOOLS -->
+  <div class="tab-panel" id="tab-schools">
+    <div class="card">
+      <h3>Schools</h3>
+      <p class="note">Derived from the "School / Organization" field teachers filled in at signup — not a separately managed school registry yet.</p>
+      <div id="schools-list"><div class="empty">No schools yet.</div></div>
+    </div>
+  </div>
+
+  <!-- COURSES -->
+  <div class="tab-panel" id="tab-courses">
+    <div class="card">
+      <h3>All Courses</h3>
+      <p class="note">Drag to reorder — this order is what a future "Browse Subjects" page would use. There's no separate "Trainers" catalog yet, so this stands in for it for now.</p>
+      <div id="courses-list"><div class="empty">No courses created yet.</div></div>
+    </div>
+  </div>
+
+  <!-- BROADCAST -->
+  <div class="tab-panel" id="tab-broadcast">
+    <div class="card">
+      <h3>Send an announcement</h3>
+      <form onsubmit="return handleBroadcast(event)">
+        <div class="field">
+          <label>Send to</label>
+          <select id="broadcast-target">
+            <option value="all">Everyone</option>
+            <option value="student">All Students</option>
+            <option value="teacher">All Teachers</option>
+            <option value="parent">All Parents</option>
+          </select>
+        </div>
+        <div class="field"><label>Subject</label><input id="broadcast-subject" required></div>
+        <div class="field"><label>Message</label><textarea id="broadcast-body" required></textarea></div>
+        <button class="btn btn--solid" type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ACTIVITY LOG -->
+  <div class="tab-panel" id="tab-activity">
+    <div class="card">
+      <h3>Activity Log</h3>
+      <p class="note">A real timeline built from actual timestamps (accounts, classes, courses, assignments, messages) — not simulated security logs. Most recent 50 events.</p>
+      <div id="activity-list"><div class="empty">Nothing yet.</div></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="tab-panel" id="tab-settings">
+    <div class="card">
+      <h3>System Settings, Permissions, Email Templates, Integrations</h3>
+      <p class="empty">None of these are wired up to anything real yet — there's no server-side configuration for them to control. This is a placeholder for when Pebblio has a real backend.</p>
+    </div>
+    <div class="card">
+      <h3>Support Tickets & Moderation</h3>
+      <p class="empty">No ticketing system exists yet. For now, deleting a problematic message, course, or user from the other tabs is the closest available moderation tool.</p>
+    </div>
+  </div>
+
+</main>
+
+<script src="auth.js"></script>
+<script src="classroom.js"></script>
+<script src="family.js"></script>
+<script>
+  let user = getCurrentUser();
+  if (!user){ window.location.href = 'login.html'; }
+  if (user && user.role !== 'admin'){ window.location.href = dashboardUrlFor(user.role); }
+  if (user) touchLastSeen(user);
+
+  let roleFilter = 'all';
+
+  function showTab(name){
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    renderAll();
+  }
+
+  function initialsFor(u){
+    if (u.firstName || u.lastName) return ((u.firstName[0]||'') + (u.lastName[0]||'')).toUpperCase() || u.username[0].toUpperCase();
+    return u.username.slice(0,2).toUpperCase();
+  }
+
+  function renderHeader(){
+    const displayName = user.firstName ? `${user.firstName} ${user.lastName}`.trim() : user.username;
+    document.getElementById('welcome-name').textContent = `Welcome back, ${displayName}`;
+    document.getElementById('avatar').textContent = initialsFor(user);
+  }
+
+  /* ---------- OVERVIEW ---------- */
+
+  function renderOverview(){
+    const users = getUsers();
+    const now = Date.now();
+    const oneHour = 60*60*1000, oneDay = 24*oneHour, sevenDays = 7*oneDay;
+
+    document.getElementById('ov-total').textContent = users.length;
+    document.getElementById('ov-new7').textContent = users.filter(u => now - new Date(u.createdAt).getTime() < sevenDays).length;
+    document.getElementById('ov-active1h').textContent = users.filter(u => u.lastSeenAt && now - new Date(u.lastSeenAt).getTime() < oneHour).length;
+    document.getElementById('ov-active24h').textContent = users.filter(u => u.lastSeenAt && now - new Date(u.lastSeenAt).getTime() < oneDay).length;
+
+    document.getElementById('ov-students').textContent = users.filter(u => u.role === 'student').length;
+    document.getElementById('ov-teachers').textContent = users.filter(u => u.role === 'teacher').length;
+    document.getElementById('ov-parents').textContent = users.filter(u => u.role === 'parent').length;
+
+    const today = todayString();
+    const assignments = readList(ASSIGNMENTS_KEY);
+    let overdueUngraded = 0;
+    assignments.forEach(a => {
+      if (!a.dueDate || a.dueDate >= today) return;
+      const studentIds = a.classId ? (getClassById(a.classId)?.studentIds || []) : (a.directStudentId ? [a.directStudentId] : []);
+      studentIds.forEach(sid => { if (getGrade(a.assignmentId, sid) === null) overdueUngraded++; });
+    });
+    document.getElementById('ov-issues').textContent = overdueUngraded;
+  }
+
+  /* ---------- USER MANAGEMENT ---------- */
+
+  function setRoleFilter(role){
+    roleFilter = role;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.role === role));
+    renderUsers();
+  }
+
+  function renderUsers(){
+    const users = getUsers().filter(u => roleFilter === 'all' || u.role === roleFilter);
+    const el = document.getElementById('users-tbody');
+    el.innerHTML = users.map(u => `
+      <tr>
+        <td>${u.email}</td>
+        <td>${u.username}</td>
+        <td>
+          <select onchange="handleRoleChange('${u.userId}', this.value)">
+            ${['student','teacher','parent','admin'].map(r => `<option value="${r}" ${u.role===r?'selected':''}>${r.charAt(0).toUpperCase()+r.slice(1)}</option>`).join('')}
+          </select>
+        </td>
+        <td>$0.00</td>
+        <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+        <td>
+          <button class="btn btn--ghost btn--sm" onclick="handleResetPassword('${u.userId}')">🔑 Reset</button>
+          <button class="btn btn--danger btn--sm" onclick="handleDeleteUser('${u.userId}','${u.email}')">Delete</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function handleRoleChange(userId, newRole){
+    setUserRole(userId, newRole);
+    if (userId === user.userId) user.role = newRole; // keep our own session's copy in sync
+    renderAll();
+  }
+
+  async function handleResetPassword(userId){
+    const newPw = prompt('Enter a new password for this user:');
+    if (!newPw) return;
+    await adminResetPassword(userId, newPw);
+    alert('Password reset.');
+  }
+
+  function handleDeleteUser(userId, email){
+    if (!confirm(`Delete ${email}? This can't be undone.`)) return;
+    deleteUserAccount(userId);
+    renderAll();
+  }
+
+  /* ---------- SCHOOLS ---------- */
+
+  function renderSchools(){
+    const teachers = getUsers().filter(u => u.role === 'teacher' && u.schoolOrg);
+    const bySchool = {};
+    teachers.forEach(t => {
+      if (!bySchool[t.schoolOrg]) bySchool[t.schoolOrg] = [];
+      bySchool[t.schoolOrg].push(t);
+    });
+    const el = document.getElementById('schools-list');
+    const names = Object.keys(bySchool);
+    el.innerHTML = names.length === 0
+      ? '<div class="empty">No schools yet.</div>'
+      : names.map(name => `
+          <div class="school-card">
+            <div class="school-card__name">${name}</div>
+            <div class="school-card__meta">${bySchool[name].length} teacher${bySchool[name].length===1?'':'s'}: ${bySchool[name].map(t => t.firstName ? t.firstName+' '+t.lastName : t.username).join(', ')}</div>
+          </div>`).join('');
+  }
+
+  /* ---------- COURSES (drag to reorder) ---------- */
+
+  const COURSE_ORDER_KEY = 'pebblio_course_order';
+
+  function getOrderedCourses(){
+    const all = getAllCourses();
+    let order = JSON.parse(localStorage.getItem(COURSE_ORDER_KEY) || '[]');
+    order = order.filter(id => all.some(c => c.courseId === id));
+    const missing = all.filter(c => !order.includes(c.courseId)).map(c => c.courseId);
+    order = [...order, ...missing];
+    localStorage.setItem(COURSE_ORDER_KEY, JSON.stringify(order));
+    return order.map(id => all.find(c => c.courseId === id));
+  }
+
+  let dragCourseId = null;
+
+  function renderCourses(){
+    const courses = getOrderedCourses();
+    const el = document.getElementById('courses-list');
+    if (courses.length === 0){ el.innerHTML = '<div class="empty">No courses created yet.</div>'; return; }
+
+    el.innerHTML = courses.map(c => `
+      <div class="course-row" draggable="true" data-id="${c.courseId}"
+        ondragstart="dragCourseId='${c.courseId}'; this.classList.add('dragging')"
+        ondragend="this.classList.remove('dragging')"
+        ondragover="event.preventDefault()"
+        ondrop="handleCourseDrop('${c.courseId}')">
+        <span class="handle">⠿</span>
+        <strong>${c.title}</strong>
+        <span class="meta">${c.subject || ''}</span>
+      </div>`).join('');
+  }
+
+  function handleCourseDrop(targetId){
+    if (!dragCourseId || dragCourseId === targetId) return;
+    let order = JSON.parse(localStorage.getItem(COURSE_ORDER_KEY) || '[]');
+    order = order.filter(id => id !== dragCourseId);
+    const targetIdx = order.indexOf(targetId);
+    order.splice(targetIdx, 0, dragCourseId);
+    localStorage.setItem(COURSE_ORDER_KEY, JSON.stringify(order));
+    dragCourseId = null;
+    renderCourses();
+  }
+
+  /* ---------- BROADCAST ---------- */
+
+  function handleBroadcast(e){
+    e.preventDefault();
+    const target = document.getElementById('broadcast-target').value;
+    const subject = document.getElementById('broadcast-subject').value.trim();
+    const body = document.getElementById('broadcast-body').value.trim();
+
+    const recipients = getUsers().filter(u => target === 'all' || u.role === target);
+    recipients.forEach(r => {
+      if (r.userId === user.userId) return; // don't message yourself
+      sendMessage({ fromUserId: user.userId, toUserId: r.userId, subject, body });
+    });
+
+    e.target.reset();
+    alert(`Sent to ${recipients.length} user(s).`);
+  }
+
+  /* ---------- ACTIVITY LOG ---------- */
+
+  function renderActivity(){
+    const events = [];
+    getUsers().forEach(u => events.push({ type:'Account', label:`${u.email} (${u.role})`, at:u.createdAt }));
+    readList(CLASSES_KEY).forEach(c => events.push({ type:'Class', label:`${c.className} (${c.classCode})`, at:c.createdAt }));
+    readList(COURSES_KEY).forEach(c => events.push({ type:'Course', label:c.title, at:c.createdAt }));
+    readList(ASSIGNMENTS_KEY).forEach(a => events.push({ type:'Assignment', label:a.title, at:a.createdAt }));
+    readList(MESSAGES_KEY).forEach(m => events.push({ type:'Message', label:m.subject, at:m.createdAt }));
+
+    events.sort((a,b) => new Date(b.at) - new Date(a.at));
+    const el = document.getElementById('activity-list');
+    el.innerHTML = events.length === 0
+      ? '<div class="empty">Nothing yet.</div>'
+      : events.slice(0, 50).map(e => `
+          <div class="log-item">
+            <span><span class="log-type">${e.type}</span>${e.label}</span>
+            <span class="log-time">${new Date(e.at).toLocaleString()}</span>
+          </div>`).join('');
+  }
+
+  /* ---------- MASTER RENDER ---------- */
+
+  function renderAll(){
+    renderHeader();
+    renderOverview();
+    renderUsers();
+    renderSchools();
+    renderCourses();
+    renderActivity();
+  }
+
+  if (user) renderAll();
+</script>
+
+</body>
+</html>
