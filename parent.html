@@ -270,6 +270,7 @@
   let user = getCurrentUser();
   if (!user){ window.location.href = 'login.html'; }
   if (user && user.role !== 'parent'){ window.location.href = dashboardUrlFor(user.role); }
+  if (user) touchLastSeen(user);
 
   document.getElementById('cap-note').textContent =
     `You can link up to ${MAX_CHILDREN_FREE} children on the free plan.`;
