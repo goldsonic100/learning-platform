@@ -325,7 +325,8 @@
 <script>
   let user = getCurrentUser();
   if (!user){ window.location.href = 'login.html'; }
-  if (user && user.role !== 'teacher'){ window.location.href = 'dashboard.html'; }
+  if (user && user.role !== 'teacher'){ window.location.href = dashboardUrlFor(user.role); }
+  if (user) touchLastSeen(user);
 
   document.getElementById('cap-note').textContent =
     `Classes are capped at ${MAX_STUDENTS_PER_CLASS} students each — unlimited class size is a planned paid feature.`;
