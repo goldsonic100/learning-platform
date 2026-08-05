@@ -6,6 +6,8 @@
 <title>Dashboard | Pebblio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
 <style>
   :root{
     --bg: #ffffff; --bg-soft: #f6f7f9; --ink: #14171f; --muted: #5b6472;
@@ -18,7 +20,7 @@
   .topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 32px; background:var(--bg); border-bottom:1px solid var(--border); }
   .topbar__logo-img{ height:30px; width:auto; display:block; }
   .topbar__right{ display:flex; align-items:center; gap:14px; }
-  .btn{ font-family:inherit; font-size:0.88rem; font-weight:600; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid transparent; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .15s ease, border-color .15s ease; }
+  .btn{ font-family:inherit; font-size:0.88rem; font-weight:600; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid transparent; text-decoration:none; display:inline-flex; align-items:center; }
   .btn--ghost{ color:var(--ink); background:transparent; border-color:var(--border); }
   .btn--ghost:hover{ border-color:var(--muted); }
   .btn--solid{ color:#fff; background:var(--accent); }
@@ -38,7 +40,7 @@
   .badge--unverified{ background:#fdeee3; color:#a15c1e; }
 
   .tabs{ display:flex; gap:4px; margin-bottom:22px; border-bottom:1px solid var(--border); overflow-x:auto; }
-  .tab-btn{ font-family:inherit; font-size:0.88rem; font-weight:600; background:none; border:none; cursor:pointer; padding:11px 4px; margin-right:20px; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; }
+  .tab-btn{ font-family:inherit; font-size:0.88rem; font-weight:600; background:none; border:none; cursor:pointer; padding:11px 4px; margin-right:20px; color:var(--muted); border-bottom:2px solid transparent; }
   .tab-btn.active{ color:var(--accent); border-bottom-color:var(--accent); }
   .tab-panel{ display:none; }
   .tab-panel.active{ display:block; }
@@ -85,7 +87,7 @@
   .class-card{ border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin-bottom:12px; }
   .class-card__head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:8px; }
   .class-card__name{ font-weight:700; font-size:0.98rem; }
-  .class-code{ font-family:'JetBrains Mono', monospace; font-weight:700; background:var(--bg-soft); border:1px dashed var(--border); border-radius:8px; padding:3px 8px; font-size:0.85rem; letter-spacing:.04em; }
+  .class-code{ font-family:'JetBrains Mono', monospace; font-weight:700; background:var(--bg-soft); border:1px dashed var(--border); border-radius:8px; padding:3px 8px; font-size:0.85rem; letter-spacing:0.05em; }
   .class-card__meta{ font-size:0.82rem; color:var(--muted); margin-bottom:8px; }
 
   .msg-item .subject{ font-weight:700; font-size:0.92rem; }
@@ -107,6 +109,8 @@
   .save-msg{ font-size:0.85rem; color:var(--success); margin-left:10px; display:none; }
   .save-msg.show{ display:inline; }
 
+  .sync-badge{ display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; padding:4px 8px; background:#e3f6ea; color:#0a5c2e; border-radius:4px; font-weight:600; }
+
   @media (max-width:760px){
     .stats-grid{ grid-template-columns:repeat(2,1fr); }
     .readonly-grid{ grid-template-columns:1fr; }
@@ -119,6 +123,7 @@
 <div class="topbar">
   <a href="index.html"><img src="pebblio-logo.png" alt="Pebblio" class="topbar__logo-img"></a>
   <div class="topbar__right">
+    <span class="sync-badge" id="sync-badge">✓ Synced</span>
     <a href="index.html" class="btn btn--ghost">Home</a>
     <button class="btn btn--solid" onclick="logout()">Logout</button>
   </div>
@@ -308,7 +313,9 @@
 </main>
 
 <script src="auth.js"></script>
+<script src="firebase-config.js"></script>
 <script src="classroom.js"></script>
+<script src="classroom-sync.js"></script>
 <script src="family.js"></script>
 <script>
   let user = getCurrentUser();
@@ -428,22 +435,24 @@
           </div>`).join('');
   }
 
-  function renderTodayAssignments(){
+  async function renderTodayAssignments(){
     const el = document.getElementById('today-assignments');
     const today = todayString();
-    const due = getAssignmentsForStudent(user.userId).filter(a => a.dueDate === today);
-    el.innerHTML = due.length === 0
+    const due = await getAssignmentsForStudentSync(user.userId);
+    const todayDue = due.filter(a => a.dueDate === today);
+    el.innerHTML = todayDue.length === 0
       ? '<div class="empty">Nothing due today.</div>'
-      : due.map(a => {
+      : todayDue.map(a => {
           const cls = getClassById(a.classId);
           return `<div class="assignment-row"><span><span class="type-pill">${a.type}</span><strong>${a.title}</strong> — ${cls ? cls.className : ''}</span></div>`;
         }).join('');
   }
 
-  function renderUpcomingTests(){
+  async function renderUpcomingTests(){
     const el = document.getElementById('upcoming-tests');
     const today = todayString();
-    const tests = getAssignmentsForStudent(user.userId)
+    const allAssignments = await getAssignmentsForStudentSync(user.userId);
+    const tests = allAssignments
       .filter(a => a.type === 'test' && a.dueDate && a.dueDate >= today)
       .sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate))
       .slice(0, 5);
@@ -455,11 +464,12 @@
         }).join('');
   }
 
-  function renderNotifications(){
+  async function renderNotifications(){
     const el = document.getElementById('notifications');
-    const unread = getInbox(user.userId).filter(m => (m.toUserId === user.userId || m.classId) && !m.read);
+    const unread = (await getInboxSync(user.userId)).filter(m => (m.toUserId === user.userId || m.classId) && !m.read);
     const today = todayString();
-    const soonDue = getAssignmentsForStudent(user.userId).filter(a => a.dueDate && a.dueDate >= today).length;
+    const allAssignments = await getAssignmentsForStudentSync(user.userId);
+    const soonDue = allAssignments.filter(a => a.dueDate && a.dueDate >= today).length;
 
     const items = [];
     if (unread.length > 0) items.push(`📬 ${unread.length} unread message${unread.length === 1 ? '' : 's'} — check your inbox`);
@@ -473,11 +483,11 @@
 
   /* ---------- MY CLASSES TAB ---------- */
 
-  function handleJoinClass(e){
+  async function handleJoinClass(e){
     e.preventDefault();
     const code = document.getElementById('join-code').value.trim().toUpperCase();
     const errEl = document.getElementById('join-err');
-    const result = joinClassByCode(code, user.userId);
+    const result = await joinClassByCodeSync(code, user.userId);
     if (!result.ok){
       errEl.textContent = result.error;
       errEl.style.display = 'block';
@@ -489,15 +499,20 @@
     return false;
   }
 
-  function renderClasses(){
-    const classes = getClassesForStudent(user.userId);
+  async function renderClasses(){
+    const classes = await getClassesForStudentSync(user.userId);
     const el = document.getElementById('classes-list');
     if (classes.length === 0){ el.innerHTML = '<div class="empty">You haven\'t joined any classes yet.</div>'; return; }
 
-    el.innerHTML = classes.map(c => {
-      const assignments = getAssignmentsByClass(c.classId);
-      const graded = assignments.filter(a => getGrade(a.assignmentId, user.userId) !== null).length;
-      return `
+    let html = '';
+    for (const c of classes) {
+      const assignments = await getAssignmentsByClassSync(c.classId);
+      let graded = 0;
+      for (const a of assignments) {
+        const grade = await getGradeSync(a.assignmentId, user.userId);
+        if (grade !== null) graded++;
+      }
+      html += `
         <div class="class-card">
           <div class="class-card__head">
             <div class="class-card__name">${c.className}</div>
@@ -515,13 +530,15 @@
             }).join('')
           }
         </div>`;
-    }).join('');
+    }
+    el.innerHTML = html;
   }
 
   /* ---------- CALENDAR TAB ---------- */
 
-  function renderCalendar(){
-    const assignments = getAssignmentsForStudent(user.userId)
+  async function renderCalendar(){
+    const allAssignments = await getAssignmentsForStudentSync(user.userId);
+    const assignments = allAssignments
       .filter(a => a.dueDate)
       .sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
     const el = document.getElementById('calendar-list');
@@ -535,8 +552,8 @@
 
   /* ---------- MESSAGES TAB ---------- */
 
-  function renderInbox(){
-    const inbox = getInbox(user.userId);
+  async function renderInbox(){
+    const inbox = await getInboxSync(user.userId);
     const el = document.getElementById('inbox-list');
     el.innerHTML = inbox.length === 0
       ? '<div class="empty">No messages.</div>'
@@ -575,7 +592,7 @@
 
   function getAchievements(){
     return [
-      { id:'first_class', icon:'🏫', title:'Joined a Class', desc:'Join your first class', unlocked: getClassesForStudent(user.userId).length > 0 },
+      { id:'first_class', icon:'🏫', title:'Joined a Class', desc:'Join your first class', unlocked: user.recentActivity ? user.recentActivity.length > 0 : false },
       { id:'first_lesson', icon:'📖', title:'First Steps', desc:'Complete your first lesson', unlocked: (user.recentActivity||[]).length > 0 },
       { id:'streak_3', icon:'🔥', title:'3-Day Streak', desc:'Learn 3 days in a row', unlocked: user.streak >= 3 },
       { id:'streak_7', icon:'🔥', title:'7-Day Streak', desc:'Learn 7 days in a row', unlocked: user.streak >= 7 },
@@ -646,17 +663,17 @@
 
   /* ---------- MASTER RENDER ---------- */
 
-  function renderAll(){
+  async function renderAll(){
     renderHeader();
     renderStats();
     renderContinueLearning();
     renderRecentLessons();
-    renderTodayAssignments();
-    renderUpcomingTests();
-    renderNotifications();
-    renderClasses();
-    renderCalendar();
-    renderInbox();
+    await renderTodayAssignments();
+    await renderUpcomingTests();
+    await renderNotifications();
+    await renderClasses();
+    await renderCalendar();
+    await renderInbox();
     renderAchievements();
     renderSettings();
   }

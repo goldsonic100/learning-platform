@@ -6,6 +6,8 @@
 <title>Teacher Dashboard | Pebblio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
 <style>
   :root{
     --bg: #ffffff; --bg-soft: #f6f7f9; --ink: #14171f; --muted: #5b6472;
@@ -19,7 +21,7 @@
   .topbar__logo-img{ height:30px; width:auto; display:block; }
   .topbar__right{ display:flex; align-items:center; gap:14px; }
 
-  .btn{ font-family:inherit; font-size:0.86rem; font-weight:600; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid transparent; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .15s ease, border-color .15s ease; }
+  .btn{ font-family:inherit; font-size:0.86rem; font-weight:600; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid transparent; text-decoration:none; display:inline-flex; align-items:center; }
   .btn--ghost{ color:var(--ink); background:transparent; border-color:var(--border); }
   .btn--ghost:hover{ border-color:var(--muted); }
   .btn--solid{ color:#fff; background:var(--accent); }
@@ -35,7 +37,7 @@
   .badge{ font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:999px; background:#ece9fd; color:var(--accent-dark); text-transform:uppercase; letter-spacing:.02em; }
 
   .tabs{ display:flex; gap:4px; margin-bottom:22px; border-bottom:1px solid var(--border); overflow-x:auto; }
-  .tab-btn{ font-family:inherit; font-size:0.86rem; font-weight:600; background:none; border:none; cursor:pointer; padding:11px 4px; margin-right:18px; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; }
+  .tab-btn{ font-family:inherit; font-size:0.86rem; font-weight:600; background:none; border:none; cursor:pointer; padding:11px 4px; margin-right:18px; color:var(--muted); border-bottom:2px solid transparent; }
   .tab-btn.active{ color:var(--accent); border-bottom-color:var(--accent); }
   .tab-panel{ display:none; }
   .tab-panel.active{ display:block; }
@@ -60,7 +62,7 @@
   .class-card{ border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin-bottom:12px; }
   .class-card__head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
   .class-card__name{ font-weight:700; font-size:1rem; }
-  .class-code{ font-family:'JetBrains Mono', monospace; font-weight:700; background:var(--bg-soft); border:1px dashed var(--border); border-radius:8px; padding:4px 10px; font-size:0.95rem; letter-spacing:.05em; }
+  .class-code{ font-family:'JetBrains Mono', monospace; font-weight:700; background:var(--bg-soft); border:1px dashed var(--border); border-radius:8px; padding:4px 10px; font-size:0.95rem; letter-spacing:0.05em; }
   .roster-row{ display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-top:1px solid var(--border); font-size:0.88rem; }
   .roster-row:first-of-type{ border-top:none; }
   .cap-note{ font-size:0.78rem; color:var(--muted); margin-top:6px; }
@@ -274,7 +276,7 @@
       <div class="stat-card"><div class="stat-card__label">Grades Entered</div><div class="stat-card__value" id="an-graded">0</div></div>
       <div class="stat-card"><div class="stat-card__label">Completion Rate</div><div class="stat-card__value" id="an-completion">0%</div></div>
     </div>
-    <div class="card"><p style="font-size:0.85rem; color:var(--muted); margin:0;">These numbers are calculated live from your real classes, assignments, and grades — not fake placeholders. They'll just look sparse until you've added a few of each.</p></div>
+    <div class="card"><p style="font-size:0.85rem; color:var(--muted); margin:0;">These numbers are calculated live from your real classes, assignments, and grades — not fake placeholders. They update every time you render the page.</p></div>
   </div>
 
   <!-- RESOURCES -->
@@ -321,7 +323,9 @@
 </main>
 
 <script src="auth.js"></script>
+<script src="firebase-config.js"></script>
 <script src="classroom.js"></script>
+<script src="classroom-sync.js"></script>
 <script>
   let user = getCurrentUser();
   if (!user){ window.location.href = 'login.html'; }
@@ -364,11 +368,11 @@
 
   /* ---------- MY CLASSES ---------- */
 
-  function handleCreateClass(e){
+  async function handleCreateClass(e){
     e.preventDefault();
     const name = document.getElementById('new-class-name').value.trim();
     if (!name) return false;
-    createClass(user.userId, name);
+    await createClassSync(user.userId, name);
     document.getElementById('new-class-name').value = '';
     renderAll();
     return false;
@@ -380,8 +384,8 @@
     return u.firstName ? `${u.firstName} ${u.lastName}`.trim() : u.username;
   }
 
-  function renderClassesList(){
-    const classes = getClassesByTeacher(user.userId);
+  async function renderClassesList(){
+    const classes = await getClassesByTeacherSync(user.userId);
     const el = document.getElementById('classes-list');
     if (classes.length === 0){ el.innerHTML = '<div class="empty">You haven\'t created any classes yet.</div>'; return; }
 
@@ -404,17 +408,17 @@
     `).join('');
   }
 
-  function handleKick(classId, studentUserId){
+  async function handleKick(classId, studentUserId){
     if (!confirm('Remove this student from the class?')) return;
-    kickStudent(classId, studentUserId);
+    await kickStudentSync(classId, studentUserId);
     renderAll();
   }
 
   /* ---------- COURSES & ASSIGNMENTS ---------- */
 
-  function handleCreateCourse(e){
+  async function handleCreateCourse(e){
     e.preventDefault();
-    createCourse(user.userId, {
+    await createCourseSync(user.userId, {
       title: document.getElementById('new-course-title').value.trim(),
       subject: document.getElementById('new-course-subject').value.trim(),
       description: document.getElementById('new-course-desc').value.trim()
@@ -424,8 +428,8 @@
     return false;
   }
 
-  function renderCoursesList(){
-    const courses = getCoursesByTeacher(user.userId);
+  async function renderCoursesList(){
+    const courses = await getCoursesByTeacherSync(user.userId);
     const el = document.getElementById('courses-list');
     el.innerHTML = courses.length === 0
       ? '<div class="empty">No courses yet.</div>'
@@ -436,8 +440,8 @@
         `).join('');
   }
 
-  function populateClassDropdowns(){
-    const classes = getClassesByTeacher(user.userId);
+  async function populateClassDropdowns(){
+    const classes = await getClassesByTeacherSync(user.userId);
     const opts = classes.map(c => `<option value="${c.classId}">${c.className} (${c.classCode})</option>`).join('');
     const emptyOpt = '<option value="">— create a class first —</option>';
 
@@ -449,15 +453,15 @@
     });
 
     const courseSel = document.getElementById('new-asg-course');
-    const courses = getCoursesByTeacher(user.userId);
+    const courses = await getCoursesByTeacherSync(user.userId);
     courseSel.innerHTML = '<option value="">— none —</option>' + courses.map(c => `<option value="${c.courseId}">${c.title}</option>`).join('');
   }
 
-  function handleCreateAssignment(e){
+  async function handleCreateAssignment(e){
     e.preventDefault();
     const classId = document.getElementById('new-asg-class').value;
     if (!classId) { alert('Create a class first.'); return false; }
-    createAssignment(user.userId, {
+    await createAssignmentSync(user.userId, {
       classId,
       courseId: document.getElementById('new-asg-course').value || null,
       title: document.getElementById('new-asg-title').value.trim(),
@@ -469,8 +473,8 @@
     return false;
   }
 
-  function renderAssignmentsList(){
-    const assignments = getAssignmentsByTeacher(user.userId);
+  async function renderAssignmentsList(){
+    const assignments = await getAssignmentsByTeacherSync(user.userId);
     const el = document.getElementById('assignments-list');
     el.innerHTML = assignments.length === 0
       ? '<div class="empty">No assignments yet.</div>'
@@ -486,13 +490,13 @@
 
   /* ---------- GRADEBOOK ---------- */
 
-  function renderGradebook(){
+  async function renderGradebook(){
     const classId = document.getElementById('gradebook-class').value;
     const el = document.getElementById('gradebook-table');
     if (!classId){ el.innerHTML = '<div class="empty">Create a class and an assignment first.</div>'; return; }
 
-    const cls = getClassById(classId);
-    const assignments = getAssignmentsByClass(classId);
+    const cls = await getClassByIdSync(classId);
+    const assignments = await getAssignmentsByClassSync(classId);
 
     if (!cls || cls.studentIds.length === 0){ el.innerHTML = '<div class="empty">No students in this class yet.</div>'; return; }
     if (assignments.length === 0){ el.innerHTML = '<div class="empty">No assignments for this class yet.</div>'; return; }
@@ -501,31 +505,31 @@
     assignments.forEach(a => html += `<th>${a.title}</th>`);
     html += '</tr></thead><tbody>';
 
-    cls.studentIds.forEach(sid => {
+    for (const sid of cls.studentIds) {
       html += `<tr><td>${studentName(sid)}</td>`;
-      assignments.forEach(a => {
-        const score = getGrade(a.assignmentId, sid);
+      for (const a of assignments) {
+        const score = await getGradeSync(a.assignmentId, sid);
         html += `<td><input type="number" min="0" max="100" value="${score ?? ''}" onchange="handleGradeChange('${a.assignmentId}','${sid}', this.value)"></td>`;
-      });
+      }
       html += '</tr>';
-    });
+    }
     html += '</tbody></table>';
     el.innerHTML = html;
   }
 
-  function handleGradeChange(assignmentId, studentUserId, value){
-    setGrade(assignmentId, studentUserId, value === '' ? null : Number(value));
+  async function handleGradeChange(assignmentId, studentUserId, value){
+    await setGradeSync(assignmentId, studentUserId, value === '' ? null : Number(value));
     renderAnalytics();
   }
 
   /* ---------- STUDENT PROGRESS ---------- */
 
-  function renderProgress(){
+  async function renderProgress(){
     const classId = document.getElementById('progress-class').value;
     const el = document.getElementById('progress-list');
     if (!classId){ el.innerHTML = '<div class="empty">No students yet — share a class code first.</div>'; return; }
 
-    const cls = getClassById(classId);
+    const cls = await getClassByIdSync(classId);
     if (!cls || cls.studentIds.length === 0){ el.innerHTML = '<div class="empty">No students in this class yet.</div>'; return; }
 
     el.innerHTML = cls.studentIds.map(sid => {
@@ -558,8 +562,8 @@
     if (type === 'student') populateStudentDropdown();
   }
 
-  function populateStudentDropdown(){
-    const classes = getClassesByTeacher(user.userId);
+  async function populateStudentDropdown(){
+    const classes = await getClassesByTeacherSync(user.userId);
     const allStudents = [];
     classes.forEach(c => c.studentIds.forEach(sid => allStudents.push(sid)));
     const sel = document.getElementById('msg-student');
@@ -568,7 +572,7 @@
       : '<option value="">— no students yet —</option>';
   }
 
-  function handleSendMessage(e){
+  async function handleSendMessage(e){
     e.preventDefault();
     const type = document.getElementById('msg-target-type').value;
     const subject = document.getElementById('msg-subject').value.trim();
@@ -577,11 +581,11 @@
     if (type === 'class'){
       const classId = document.getElementById('msg-class').value;
       if (!classId){ alert('Create a class first.'); return false; }
-      sendMessage({ fromUserId: user.userId, classId, subject, body });
+      await sendMessageSync({ fromUserId: user.userId, classId, subject, body });
     } else {
       const studentId = document.getElementById('msg-student').value;
       if (!studentId){ alert('No student selected.'); return false; }
-      sendMessage({ fromUserId: user.userId, toUserId: studentId, subject, body });
+      await sendMessageSync({ fromUserId: user.userId, toUserId: studentId, subject, body });
     }
 
     e.target.reset();
@@ -591,8 +595,8 @@
     return false;
   }
 
-  function renderInbox(){
-    const inbox = getInbox(user.userId).filter(m => m.toUserId === user.userId);
+  async function renderInbox(){
+    const inbox = (await getInboxSync(user.userId)).filter(m => m.toUserId === user.userId);
     const el = document.getElementById('inbox-list');
     el.innerHTML = inbox.length === 0
       ? '<div class="empty">No messages.</div>'
@@ -606,8 +610,8 @@
 
   /* ---------- CALENDAR ---------- */
 
-  function renderCalendar(){
-    const assignments = getAssignmentsByTeacher(user.userId)
+  async function renderCalendar(){
+    const assignments = (await getAssignmentsByTeacherSync(user.userId))
       .filter(a => a.dueDate)
       .sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
     const el = document.getElementById('calendar-list');
@@ -625,8 +629,8 @@
 
   /* ---------- ANALYTICS ---------- */
 
-  function renderAnalytics(){
-    const classes = getClassesByTeacher(user.userId);
+  async function renderAnalytics(){
+    const classes = await getClassesByTeacherSync(user.userId);
     const allStudentIds = [...new Set(classes.flatMap(c => c.studentIds))];
     const students = allStudentIds.map(sid => getUsers().find(u => u.userId === sid)).filter(Boolean);
 
@@ -635,26 +639,29 @@
     document.getElementById('an-avg-streak').textContent = students.length
       ? (students.reduce((sum,u) => sum + u.streak, 0) / students.length).toFixed(1) : '—';
 
-    const assignments = getAssignmentsByTeacher(user.userId);
-    const grades = readList(GRADES_KEY).filter(g => assignments.some(a => a.assignmentId === g.assignmentId) && g.score !== null);
-    document.getElementById('an-graded').textContent = grades.length;
+    const assignments = await getAssignmentsByTeacherSync(user.userId);
+    const grades = await readListSync(GRADES_KEY);
+    const graded = grades.filter(g => assignments.some(a => a.assignmentId === g.assignmentId) && g.score !== null);
+    document.getElementById('an-graded').textContent = graded.length;
 
     const possibleGrades = assignments.reduce((sum,a) => {
       const cls = getClassById(a.classId);
       return sum + (cls ? cls.studentIds.length : 0);
     }, 0);
     document.getElementById('an-completion').textContent = possibleGrades
-      ? Math.round((grades.length / possibleGrades) * 100) + '%' : '0%';
+      ? Math.round((graded.length / possibleGrades) * 100) + '%' : '0%';
   }
 
   /* ---------- OVERVIEW ---------- */
 
-  function renderOverview(){
-    const classes = getClassesByTeacher(user.userId);
+  async function renderOverview(){
+    const classes = await getClassesByTeacherSync(user.userId);
     document.getElementById('ov-classes').textContent = classes.length;
     document.getElementById('ov-students').textContent = classes.reduce((sum,c) => sum + c.studentIds.length, 0);
-    document.getElementById('ov-assignments').textContent = getAssignmentsByTeacher(user.userId).length;
-    document.getElementById('ov-unread').textContent = getInbox(user.userId).filter(m => m.toUserId === user.userId && !m.read).length;
+    const assignments = await getAssignmentsByTeacherSync(user.userId);
+    document.getElementById('ov-assignments').textContent = assignments.length;
+    const inbox = (await getInboxSync(user.userId)).filter(m => m.toUserId === user.userId && !m.read);
+    document.getElementById('ov-unread').textContent = inbox.length;
   }
 
   /* ---------- SETTINGS ---------- */
@@ -674,7 +681,7 @@
     document.getElementById('ro-hash').textContent = user.passwordHash;
   }
 
-  function saveSettings(e){
+  async function saveSettings(e){
     e.preventDefault();
     const newId = document.getElementById('set-userid').value.trim().toLowerCase();
     const idField = document.getElementById('userid-field');
@@ -692,7 +699,7 @@
     user.profilePicture = document.getElementById('set-picture').value.trim();
 
     saveUser(user, oldUserId);
-    renameUserIdEverywhere(oldUserId, user.userId);
+    await renameUserIdEverywhereSync(oldUserId, user.userId);
     setCurrentUser(user.userId);
 
     renderAll();
@@ -704,18 +711,18 @@
 
   /* ---------- MASTER RENDER ---------- */
 
-  function renderAll(){
+  async function renderAll(){
     renderHeader();
-    populateClassDropdowns();
-    renderClassesList();
-    renderCoursesList();
-    renderAssignmentsList();
-    renderGradebook();
-    renderProgress();
-    renderInbox();
-    renderCalendar();
-    renderAnalytics();
-    renderOverview();
+    await populateClassDropdowns();
+    await renderClassesList();
+    await renderCoursesList();
+    await renderAssignmentsList();
+    await renderGradebook();
+    await renderProgress();
+    await renderInbox();
+    await renderCalendar();
+    await renderAnalytics();
+    await renderOverview();
     renderSettings();
   }
 
